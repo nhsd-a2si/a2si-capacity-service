@@ -1,0 +1,13 @@
+spring:
+  redis:
+    host: 192.168.99.100
+    port: 32768
+
+jedis:
+ host: 192.168.99.100
+ port: 32768
+
+capacity:
+  service:
+    cache:
+      timeToLiveInSeconds: 60
