@@ -1,13 +1,13 @@
 # The individual Redis nodes, denoted as host + ':' + port
-spring:
-  redis:
-    cluster:
-      nodes: capacity-info-cache-0001-001.y0cxg2.0001.euw2.cache.amazonaws.com:6379,
-             capacity-info-cache-0001-002.y0cxg2.0001.euw2.cache.amazonaws.com:6379,
-             capacity-info-cache-0001-003.y0cxg2.0001.euw2.cache.amazonaws.com:6379,
-             capacity-info-cache-0002-001.y0cxg2.0001.euw2.cache.amazonaws.com:6379,
-             capacity-info-cache-0002-002.y0cxg2.0001.euw2.cache.amazonaws.com:6379,
-             capacity-info-cache-0002-003.y0cxg2.0001.euw2.cache.amazonaws.com:6379,
-             capacity-info-cache-0003-001.y0cxg2.0001.euw2.cache.amazonaws.com:6379,
-             capacity-info-cache-0003-002.y0cxg2.0001.euw2.cache.amazonaws.com:6379,
-             capacity-info-cache-0003-003.y0cxg2.0001.euw2.cache.amazonaws.com:6379
+#spring:
+#  redis:
+#    cluster:
+   #   nodes: rediscluster-0001-001.vqe4gl.0001.use1.cache.amazonaws.com:6379,
+   #          rediscluster-0001-002.vqe4gl.0001.use1.cache.amazonaws.com:6379,
+   #          rediscluster-0001-003.vqe4gl.0001.use1.cache.amazonaws.com:6379,
+   #          rediscluster-0002-001.vqe4gl.0001.use1.cache.amazonaws.com:6379,
+   #          rediscluster-0002-002.vqe4gl.0001.use1.cache.amazonaws.com:6379,
+   #          rediscluster-0002-003.vqe4gl.0001.use1.cache.amazonaws.com:6379,
+   #          rediscluster-0003-001.vqe4gl.0001.use1.cache.amazonaws.com:6379,
+   #          rediscluster-0003-002.vqe4gl.0001.use1.cache.amazonaws.com:6379,
+   #          rediscluster-0003-003.vqe4gl.0001.use1.cache.amazonaws.com:6379
