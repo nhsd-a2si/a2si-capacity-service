@@ -110,7 +110,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <appendAssembly>false</appendAssembly>
+                    <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
                         <descriptor>assembly.xml</descriptor>
                     </descriptors>
