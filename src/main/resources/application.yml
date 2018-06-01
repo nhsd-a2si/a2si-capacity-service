@@ -1,14 +1,6 @@
-#capacity:
-#  service:
-#    api:
-     # username: dummyValue
-     # password: dummyValue
-#    cache:
-     # timeToLiveInSeconds: 1800
-
-#spring:
-#  application:
-    #name: a2si-capacity-service
+spring:
+  application:
+    name: a2si-capacity-service
 
 server:
   port: 7020
