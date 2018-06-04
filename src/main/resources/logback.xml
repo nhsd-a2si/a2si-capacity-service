@@ -4,15 +4,13 @@
     <!-- PROPERTIES -->
     <property name="layout" value="%d{HH:mm:ss.SSS} %-5level [%thread][%logger{0}] %m%n" />
 
-    <property name="logFile" value="/var/a2si-capacity-service/logs/a2si-capacity-service-log" />
-
     <!-- APPENDERS -->
     <appender name="LOG_FILE"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>${logFile}.log</File>
+        <File>${LOG_PATH:-logs/a2si}/a2si-capacity-service.log</File>
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${logFile}.%d{yyyy-MM-dd-HH}.log
+            <fileNamePattern>${LOG_PATH:-logs/a2si}/a2si-capacity-service.%d{yyyy-MM-dd-HH}.log
             </fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
