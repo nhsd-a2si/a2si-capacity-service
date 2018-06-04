@@ -1,8 +1,8 @@
-package com.bjss.nhsd.a2si.capacityservice.endpoints;
+package com.nhsd.a2si.capacityservice.endpoints;
 
-import com.bjss.nhsd.a2si.capacityinformation.domain.CapacityInformation;
-import com.bjss.nhsd.a2si.capacityservice.exceptions.AuthenticationException;
-import com.bjss.nhsd.a2si.capacityservice.persistence.CapacityInformationRepository;
+import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
+import com.nhsd.a2si.capacityservice.exceptions.AuthenticationException;
+import com.nhsd.a2si.capacityservice.persistence.CapacityInformationRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

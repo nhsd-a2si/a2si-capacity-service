@@ -1,6 +1,6 @@
-package com.bjss.nhsd.a2si.capacityservice.configuration;
+package com.nhsd.a2si.capacityservice.configuration;
 
-import com.bjss.nhsd.a2si.capacityinformation.domain.CapacityInformation;
+import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

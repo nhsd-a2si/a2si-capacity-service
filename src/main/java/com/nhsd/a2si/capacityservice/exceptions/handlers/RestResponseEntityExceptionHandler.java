@@ -1,6 +1,6 @@
-package com.bjss.nhsd.a2si.capacityservice.exceptions.handlers;
+package com.nhsd.a2si.capacityservice.exceptions.handlers;
 
-import com.bjss.nhsd.a2si.capacityservice.exceptions.AuthenticationException;
+import com.nhsd.a2si.capacityservice.exceptions.AuthenticationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

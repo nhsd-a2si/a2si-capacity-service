@@ -1,4 +1,4 @@
-package com.bjss.nhsd.a2si.capacityservice.exceptions;
+package com.nhsd.a2si.capacityservice.exceptions;
 
 public class AuthenticationException extends RuntimeException {
 
