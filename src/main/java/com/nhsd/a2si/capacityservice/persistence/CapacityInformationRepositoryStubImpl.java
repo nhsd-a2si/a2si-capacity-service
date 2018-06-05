@@ -1,6 +1,6 @@
-package com.bjss.nhsd.a2si.capacityservice.persistence;
+package com.nhsd.a2si.capacityservice.persistence;
 
-import com.bjss.nhsd.a2si.capacityinformation.domain.CapacityInformation;
+import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;

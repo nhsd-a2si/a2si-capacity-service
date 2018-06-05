@@ -1,4 +1,4 @@
-package com.bjss.nhsd.a2si.capacityservice.exceptions.handlers;
+package com.nhsd.a2si.capacityservice.exceptions.handlers;
 
 public class ExceptionResponse {
 

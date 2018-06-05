@@ -1,6 +1,6 @@
-package com.bjss.nhsd.a2si.capacityservice.persistence;
+package com.nhsd.a2si.capacityservice.persistence;
 
-import com.bjss.nhsd.a2si.capacityinformation.domain.CapacityInformation;
+import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
 
 import java.util.List;
 
