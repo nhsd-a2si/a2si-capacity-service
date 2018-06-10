@@ -132,7 +132,7 @@ capacity:
 The values for the headers can also be defined using environment variables which should be named:
 
 + `CAPACITY_SERVICE_CLIENT_API_USERNAME`
-+ `CAPACITY_SERVICE_CLIENT_API_USERNAME` 
++ `CAPACITY_SERVICE_CLIENT_API_PASSWORD` 
 
 It is also possible to pass the settings as command line parameters when running the application:
 
