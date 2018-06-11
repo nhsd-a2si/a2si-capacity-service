@@ -1,0 +1,162 @@
+{
+	"info": {
+		"_postman_id": "9ccc495a-1ed2-c717-46f6-7be88502af1f",
+		"name": "Capacity Service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Add data",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0e8ed372-d1e9-4316-9f67-9c7f023e9182",
+						"type": "text/javascript",
+						"exec": [
+							"var moment = require('moment')",
+							"pm.globals.set(\"timestamp\", moment().format(\"YYYY-MM-DD HH:mm:ss\"))"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "capacity-service-api-username",
+						"value": "dummyValue"
+					},
+					{
+						"key": "capacity-service-api-password",
+						"value": "dummyValue"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n \"serviceId\": \"1363094818\",\n \"numberOfPeopleWaiting\": 24,\n \"waitingTimeMins\": 50,\n \"message\": \"The current wait time is **50 minutes** but may be longer or shorter when you arrive. There are 24 people at the service currently.\",\n \"lastUpdated\": \"{{timestamp}}\"\n}"
+				},
+				"url": {
+					"raw": "{{capacity_service_url}}/capacity",
+					"host": [
+						"{{capacity_service_url}}"
+					],
+					"path": [
+						"capacity"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get data",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "capacity-service-api-username",
+						"value": "dummyValue"
+					},
+					{
+						"key": "capacity-service-api-password",
+						"value": "dummyValue"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "{{capacity_service_url}}/capacity/1363094818",
+					"host": [
+						"{{capacity_service_url}}"
+					],
+					"path": [
+						"capacity",
+						"1363094818"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Data",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "capacity-service-api-username",
+						"value": "dummyValue"
+					},
+					{
+						"key": "capacity-service-api-password",
+						"value": "dummyValue"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "{{capacity_service_url}}/capacity/all",
+					"host": [
+						"{{capacity_service_url}}"
+					],
+					"path": [
+						"capacity",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete data",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "capacity-service-api-username",
+						"value": "a2si-capacity-user"
+					},
+					{
+						"key": "capacity-service-api-password",
+						"value": "AyTooEssEye"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "{{capacity_service_url}}/capacity/all",
+					"host": [
+						"{{capacity_service_url}}"
+					],
+					"path": [
+						"capacity",
+						"all"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "ab559264-d526-4d53-8adc-696e5aad1ee4",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "6de02875-5e51-4b18-b12b-5efc5771a3bd",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
