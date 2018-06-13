@@ -1,13 +1,1 @@
-# The individual Redis nodes, denoted as host + ':' + port
-#spring:
-#  redis:
-#    cluster:
-   #   nodes: rediscluster-0001-001.vqe4gl.0001.use1.cache.amazonaws.com:6379,
-   #          rediscluster-0001-002.vqe4gl.0001.use1.cache.amazonaws.com:6379,
-   #          rediscluster-0001-003.vqe4gl.0001.use1.cache.amazonaws.com:6379,
-   #          rediscluster-0002-001.vqe4gl.0001.use1.cache.amazonaws.com:6379,
-   #          rediscluster-0002-002.vqe4gl.0001.use1.cache.amazonaws.com:6379,
-   #          rediscluster-0002-003.vqe4gl.0001.use1.cache.amazonaws.com:6379,
-   #          rediscluster-0003-001.vqe4gl.0001.use1.cache.amazonaws.com:6379,
-   #          rediscluster-0003-002.vqe4gl.0001.use1.cache.amazonaws.com:6379,
-   #          rediscluster-0003-003.vqe4gl.0001.use1.cache.amazonaws.com:6379
+# Currently configured via terraform

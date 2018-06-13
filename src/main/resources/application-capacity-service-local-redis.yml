@@ -9,3 +9,7 @@ capacity:
     api:
       username: dummyValue
       password: dummyValue
+
+server:
+  ssl:
+    enabled: false
