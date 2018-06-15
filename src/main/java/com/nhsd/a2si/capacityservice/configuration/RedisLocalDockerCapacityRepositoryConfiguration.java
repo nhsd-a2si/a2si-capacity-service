@@ -21,14 +21,14 @@ import java.util.List;
 @Profile({"capacity-service-local-redis", "test-capacity-service-local-redis"})
 public class RedisLocalDockerCapacityRepositoryConfiguration {
 
-    public RedisLocalDockerCapacityRepositoryConfiguration() {
-    }
-
     @Value("${jedis.host}")
     private String jedisHost;
 
     @Value("${jedis.port}")
     private Integer jedisPort;
+
+    @Value("${jedis.ssl}")
+    private boolean jedisUseSsl;
 
     @Bean
     JedisPoolConfig jedisPoolConfig() {
@@ -44,6 +44,7 @@ public class RedisLocalDockerCapacityRepositoryConfiguration {
         JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(jedisPoolConfig());
         jedisConnectionFactory.setHostName(jedisHost);
         jedisConnectionFactory.setPort(jedisPort);
+        jedisConnectionFactory.setUseSsl(jedisUseSsl);
         return jedisConnectionFactory;
     }
 
@@ -52,7 +53,6 @@ public class RedisLocalDockerCapacityRepositoryConfiguration {
         RedisTemplate<String, CapacityInformation> redisTemplate = new RedisTemplate<>();
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setConnectionFactory(jedisConnectionFactory());
-        //redisTemplate.setEnableTransactionSupport(false);
         return redisTemplate;
     }
 

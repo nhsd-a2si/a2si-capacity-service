@@ -24,8 +24,8 @@ public class RedisClusterCapacityRepositoryConfiguration {
     @Value("${spring.redis.cluster.nodes}")
     private List<String> redisNodeUrls ;
 
-    public RedisClusterCapacityRepositoryConfiguration() {
-    }
+    @Value("${spring.redis.ssl}")
+    private boolean jedisUseSsl;
 
     @Bean
     JedisPoolConfig jedisPoolConfig() {
@@ -38,11 +38,10 @@ public class RedisClusterCapacityRepositoryConfiguration {
 
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
-
         RedisClusterConfiguration redisClusterConfiguration = new RedisClusterConfiguration(redisNodeUrls);
-
         JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(redisClusterConfiguration);
         jedisConnectionFactory.setPoolConfig(jedisPoolConfig());
+        jedisConnectionFactory.setUseSsl(jedisUseSsl);
         return jedisConnectionFactory;
     }
 
@@ -51,7 +50,6 @@ public class RedisClusterCapacityRepositoryConfiguration {
         RedisTemplate<String, CapacityInformation> redisTemplate = new RedisTemplate<>();
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setConnectionFactory(jedisConnectionFactory());
-        //redisTemplate.setEnableTransactionSupport(false);
         return redisTemplate;
     }
 
