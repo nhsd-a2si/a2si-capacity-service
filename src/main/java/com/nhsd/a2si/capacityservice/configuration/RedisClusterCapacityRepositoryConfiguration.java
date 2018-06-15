@@ -27,6 +27,9 @@ public class RedisClusterCapacityRepositoryConfiguration {
     @Value("${spring.redis.ssl}")
     private boolean jedisUseSsl;
 
+    @Value("${spring.redis.authentication.key}")
+    private String authentication;
+
     @Bean
     JedisPoolConfig jedisPoolConfig() {
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
@@ -42,6 +45,7 @@ public class RedisClusterCapacityRepositoryConfiguration {
         JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(redisClusterConfiguration);
         jedisConnectionFactory.setPoolConfig(jedisPoolConfig());
         jedisConnectionFactory.setUseSsl(jedisUseSsl);
+        jedisConnectionFactory.setPassword(authentication);
         return jedisConnectionFactory;
     }
 
