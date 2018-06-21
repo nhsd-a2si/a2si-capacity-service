@@ -1,6 +1,8 @@
 spring:
   application:
     name: a2si-capacity-service
+  redis:
+    ssl: false
 
 server:
   port: 7020
