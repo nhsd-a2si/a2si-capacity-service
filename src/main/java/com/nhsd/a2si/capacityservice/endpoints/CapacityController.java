@@ -105,7 +105,7 @@ public class CapacityController {
 
         validateApiCredentials(apiUsername, apiPassword);
 
-        logger.debug("Storing Capacity Information for Service Id: {} with value of {}",
+        logger.info("Storing Capacity Information for Service Id: {} with value of {}",
                 capacityInformation.getServiceId(), capacityInformation);
 
         if (capacityInformation.getLastUpdated() == null) {
