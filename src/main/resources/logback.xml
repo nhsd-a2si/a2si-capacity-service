@@ -2,7 +2,7 @@
 <configuration scan="true" scanPeriod="60 seconds">
 
     <!-- PROPERTIES -->
-    <property name="layout" value="%d{HH:mm:ss.SSS} %-5level [%thread][%logger{0}] %m%n" />
+    <property name="layout" value="%d{dd-MM-yyyy HH:mm:ss.SSS} %-5level [%thread][%logger{0}] %m%n" />
 
     <!-- APPENDERS -->
     <appender name="LOG_FILE"
