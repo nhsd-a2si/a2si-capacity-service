@@ -1,6 +1,10 @@
 package com.nhsd.a2si.capacityservice.persistence;
 
 import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
+
+import org.assertj.core.api.Assertions;
+import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -34,7 +38,7 @@ public class CapacityServiceApplicationStubRepositoryTests {
 
         CapacityInformation capacityInformation = new CapacityInformation();
         capacityInformation.setServiceId(defaultServiceId);
-        capacityInformation.setMessage(CapacityInformation.messageTemplate);
+		capacityInformation.setWaitingTimeMins(32);
         capacityInformation.setLastUpdated(dateTimeFormatter.format(LocalDateTime.now()));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
@@ -46,7 +50,7 @@ public class CapacityServiceApplicationStubRepositoryTests {
 
 		CapacityInformation capacityInformation = new CapacityInformation();
 		capacityInformation.setServiceId("newServiceId");
-		capacityInformation.setMessage(CapacityInformation.messageTemplate);
+		capacityInformation.setWaitingTimeMins(33);
         capacityInformation.setLastUpdated(dateTimeFormatter.format(LocalDateTime.now()));
 
 		capacityInformationRepository.saveCapacityInformation(capacityInformation);
@@ -58,7 +62,7 @@ public class CapacityServiceApplicationStubRepositoryTests {
         CapacityInformation capacityInformation =
                 capacityInformationRepository.getCapacityInformationByServiceId(defaultServiceId);
         assertEquals(capacityInformation.getServiceId(), defaultServiceId);
-        assertEquals(capacityInformation.getMessage(),CapacityInformation.messageTemplate);
+        Assert.assertThat(capacityInformation.getMessage(), CoreMatchers.containsString("32 min"));
     }
 
     @Test
@@ -72,27 +76,27 @@ public class CapacityServiceApplicationStubRepositoryTests {
         String serviceId0002 = "serviceId0002";
 
 
-        capacityInformation = new CapacityInformation(serviceId0001, CapacityInformation.messageTemplate,
+        capacityInformation = new CapacityInformation(serviceId0001, 31,
                 dateTimeFormatter.format(now.minusHours(3)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0001, CapacityInformation.messageTemplate,
+        capacityInformation = new CapacityInformation(serviceId0001, 31,
                 dateTimeFormatter.format(now.minusHours(1)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0001, CapacityInformation.messageTemplate,
+        capacityInformation = new CapacityInformation(serviceId0001, 31,
                 dateTimeFormatter.format(now));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0001, CapacityInformation.messageTemplate,
+        capacityInformation = new CapacityInformation(serviceId0001, 31,
                 dateTimeFormatter.format(now.plusHours(1)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0001, CapacityInformation.messageTemplate,
+        capacityInformation = new CapacityInformation(serviceId0001, 31,
                 dateTimeFormatter.format(now.plusHours(3)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
@@ -114,7 +118,7 @@ public class CapacityServiceApplicationStubRepositoryTests {
 
         CapacityInformation latestCapacityInformationForServiceId0001 =
                 capacityInformationRepository.getCapacityInformationByServiceId(serviceId0001);
-        assertEquals(CapacityInformation.messageTemplate, latestCapacityInformationForServiceId0001.getMessage());
+        Assert.assertThat(latestCapacityInformationForServiceId0001.getMessage(), CoreMatchers.containsString("31 min"));
 
     }
 
