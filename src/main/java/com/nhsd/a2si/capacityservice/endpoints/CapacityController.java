@@ -9,8 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -101,7 +103,7 @@ public class CapacityController {
     public void setCapacityInformation(
             @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
             @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword,
-            @RequestBody CapacityInformation capacityInformation) {
+            @Valid @RequestBody CapacityInformation capacityInformation) {
 
         validateApiCredentials(apiUsername, apiPassword);
 
