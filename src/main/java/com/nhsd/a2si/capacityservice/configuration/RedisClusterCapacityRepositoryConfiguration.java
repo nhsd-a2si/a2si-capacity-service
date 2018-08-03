@@ -1,6 +1,7 @@
 package com.nhsd.a2si.capacityservice.configuration;
 
 import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
+import io.lettuce.core.cluster.ClusterClientOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,8 +27,14 @@ public class RedisClusterCapacityRepositoryConfiguration {
     LettuceClientConfiguration lettuceClientConfiguration(){
         LettuceClientConfiguration.LettuceClientConfigurationBuilder configurationBuilder = LettuceClientConfiguration.builder();
         return configurationBuilder.commandTimeout(Duration.ofSeconds(2))
-                .useSsl().and()
-                .shutdownTimeout(Duration.ZERO)
+                .clientOptions(
+                        ClusterClientOptions
+                                .builder()
+                                // See https://github.com/lettuce-io/lettuce-core/issues/451
+                                .validateClusterNodeMembership(false)
+                                .build()
+                )
+                .useSsl().and().shutdownTimeout(Duration.ZERO)
                 .build();
     }
 
