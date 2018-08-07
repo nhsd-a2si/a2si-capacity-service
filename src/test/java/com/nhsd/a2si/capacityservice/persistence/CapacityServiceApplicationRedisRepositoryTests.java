@@ -43,7 +43,6 @@ public class CapacityServiceApplicationRedisRepositoryTests {
 
 		CapacityInformation capacityInformation = new CapacityInformation();
 		capacityInformation.setServiceId(serviceId);
-		capacityInformation.setMessage(CapacityInformation.messageTemplate);
         capacityInformation.setLastUpdated(dateTimeFormatter.format(LocalDateTime.now()));
 
 		capacityInformationRepository.saveCapacityInformation(capacityInformation);
@@ -56,14 +55,12 @@ public class CapacityServiceApplicationRedisRepositoryTests {
 
         CapacityInformation capacityInformation = new CapacityInformation();
         capacityInformation.setServiceId(defaultServiceId);
-        capacityInformation.setMessage(CapacityInformation.messageTemplate);
         capacityInformation.setLastUpdated(lastUpdatedString);
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
         capacityInformation = capacityInformationRepository.getCapacityInformationByServiceId(defaultServiceId);
         assertEquals(capacityInformation.getServiceId(), defaultServiceId);
-        assertEquals(capacityInformation.getMessage(), CapacityInformation.messageTemplate);
         assertEquals(capacityInformation.getLastUpdated(), lastUpdatedString);
     }
 
@@ -78,18 +75,15 @@ public class CapacityServiceApplicationRedisRepositoryTests {
 
         capacityInformationRepository.deleteCapacityInformation(serviceId);
 
-        capacityInformation = new CapacityInformation(serviceId, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth));
+        capacityInformation = new CapacityInformation(serviceId, dateTimeFormatter.format(inOneMonth));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(1)));
+        capacityInformation = new CapacityInformation(serviceId, dateTimeFormatter.format(inOneMonth.plusDays(1)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(2)));
+        capacityInformation = new CapacityInformation(serviceId, dateTimeFormatter.format(inOneMonth.plusDays(2)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
@@ -114,35 +108,29 @@ public class CapacityServiceApplicationRedisRepositoryTests {
         capacityInformationRepository.deleteCapacityInformation(serviceId0001);
         capacityInformationRepository.deleteCapacityInformation(serviceId0002);
 
-        capacityInformation = new CapacityInformation(serviceId0001, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth));
+        capacityInformation = new CapacityInformation(serviceId0001, dateTimeFormatter.format(inOneMonth));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0001, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(1)));
+        capacityInformation = new CapacityInformation(serviceId0001, dateTimeFormatter.format(inOneMonth.plusDays(1)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0001, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(2)));
+        capacityInformation = new CapacityInformation(serviceId0001, dateTimeFormatter.format(inOneMonth.plusDays(2)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
 
 
-        capacityInformation = new CapacityInformation(serviceId0002, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth));
+        capacityInformation = new CapacityInformation(serviceId0002, dateTimeFormatter.format(inOneMonth));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0002, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(1)));
+        capacityInformation = new CapacityInformation(serviceId0002, dateTimeFormatter.format(inOneMonth.plusDays(1)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0002, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(2)));
+        capacityInformation = new CapacityInformation(serviceId0002, dateTimeFormatter.format(inOneMonth.plusDays(2)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 

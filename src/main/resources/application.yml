@@ -20,3 +20,11 @@ management:
       path-mapping:
         health: /healthcheck
       base-path: /
+
+amazon:
+  aws:
+    dynamo:
+      accesskey: "AKIAIF4KRTTILKIZVGNA"
+      secretkey: "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"
+      endpoint: "https://dynamodb.eu-west-2.amazonaws.com"
+      region: "eu-west-2"

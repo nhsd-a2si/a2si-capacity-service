@@ -101,18 +101,15 @@ public class CapacityServiceApplicationStubRepositoryTests {
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0002, CapacityInformation.messageTemplate,
-                "2017-09-20 00:00:00");
+        capacityInformation = new CapacityInformation(serviceId0002, "2017-09-20 00:00:00");
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0002, CapacityInformation.messageTemplate,
-                "2017-10-20 20:00:00");
+        capacityInformation = new CapacityInformation(serviceId0002, "2017-10-20 20:00:00");
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0002, CapacityInformation.messageTemplate,
-                "2017-10-20 10:00:00");
+        capacityInformation = new CapacityInformation(serviceId0002, "2017-10-20 10:00:00");
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
@@ -131,18 +128,15 @@ public class CapacityServiceApplicationStubRepositoryTests {
 
         String serviceId0005 = "serviceId0005";
 
-        capacityInformation = new CapacityInformation(serviceId0005, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth));
+        capacityInformation = new CapacityInformation(serviceId0005, dateTimeFormatter.format(inOneMonth));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0005, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(1)));
+        capacityInformation = new CapacityInformation(serviceId0005, dateTimeFormatter.format(inOneMonth.plusDays(1)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0005, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(2)));
+        capacityInformation = new CapacityInformation(serviceId0005, dateTimeFormatter.format(inOneMonth.plusDays(2)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
@@ -161,18 +155,15 @@ public class CapacityServiceApplicationStubRepositoryTests {
 
         String serviceId0006 = "serviceId0006";
 
-        capacityInformation = new CapacityInformation(serviceId0006, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth));
+        capacityInformation = new CapacityInformation(serviceId0006, dateTimeFormatter.format(inOneMonth));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0006, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(1)));
+        capacityInformation = new CapacityInformation(serviceId0006, dateTimeFormatter.format(inOneMonth.plusDays(1)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0006, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(2)));
+        capacityInformation = new CapacityInformation(serviceId0006, dateTimeFormatter.format(inOneMonth.plusDays(2)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
@@ -193,35 +184,29 @@ public class CapacityServiceApplicationStubRepositoryTests {
 
         String serviceId0007 = "serviceId0007";
 
-        capacityInformation = new CapacityInformation(serviceId0007, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth));
+        capacityInformation = new CapacityInformation(serviceId0007, dateTimeFormatter.format(inOneMonth));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0007, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(1)));
+        capacityInformation = new CapacityInformation(serviceId0007, dateTimeFormatter.format(inOneMonth.plusDays(1)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0007, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(2)));
+        capacityInformation = new CapacityInformation(serviceId0007, dateTimeFormatter.format(inOneMonth.plusDays(2)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
         String serviceId0008 = "serviceId0008";
 
-        capacityInformation = new CapacityInformation(serviceId0008, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth));
+        capacityInformation = new CapacityInformation(serviceId0008, dateTimeFormatter.format(inOneMonth));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0008, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(1)));
+        capacityInformation = new CapacityInformation(serviceId0008, dateTimeFormatter.format(inOneMonth.plusDays(1)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
-        capacityInformation = new CapacityInformation(serviceId0008, CapacityInformation.messageTemplate,
-                dateTimeFormatter.format(inOneMonth.plusDays(2)));
+        capacityInformation = new CapacityInformation(serviceId0008, dateTimeFormatter.format(inOneMonth.plusDays(2)));
 
         capacityInformationRepository.saveCapacityInformation(capacityInformation);
 
