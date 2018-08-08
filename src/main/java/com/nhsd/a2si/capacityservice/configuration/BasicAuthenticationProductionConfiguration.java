@@ -14,8 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
-//@Profile({"capacity-service-aws-redis"})
-@Profile({"capacity-service-aws-redis"})
+@Profile({"capacity-service-aws-redis", "capacity-service-aws-stub"})
 public class BasicAuthenticationProductionConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
