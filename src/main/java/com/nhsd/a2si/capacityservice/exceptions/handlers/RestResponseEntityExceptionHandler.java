@@ -16,6 +16,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.nhsd.a2si.capacityinformation.domain.CapacityInformation.STRING_DATE_FORMAT;
 
@@ -98,6 +100,20 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             details = "Duplicate key";
         }
 
+        if(ex.getCause().getMessage().toLowerCase().contains("cannot deserialize value of type")){
+            final String message = ex.getCause().getMessage();
+            final String element = message.substring(message.indexOf("[\"") +2, message.indexOf("\"]"));
+            Matcher matcher = Pattern.compile("[`.]([^`.]+)?`").matcher(message);
+            if(matcher.find()){
+                details = String.join(
+                        "", "Incorrect data type used for '", element, "'. ", "The expected data type is '", matcher.group(1), "'"
+                );
+            } else {
+                details = String.join(
+                        "","Incorrect data type used for '", element, "'"
+                );
+            }
+        }
         return new ResponseEntity<>(new ExceptionResponse(new SimpleDateFormat(STRING_DATE_FORMAT).format(new Date().getTime()), "Not readable", details), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 

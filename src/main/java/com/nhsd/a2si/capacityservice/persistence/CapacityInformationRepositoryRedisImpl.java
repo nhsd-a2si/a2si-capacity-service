@@ -1,6 +1,8 @@
 package com.nhsd.a2si.capacityservice.persistence;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
 import org.slf4j.Logger;
@@ -35,6 +37,9 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
         this.redisTemplate = redisTemplate;
     }
 
+    @Autowired
+    private ObjectMapper mapper;
+
     @Override
     public CapacityInformation getCapacityInformationByServiceId(String serviceId) {
 
@@ -42,7 +47,7 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
 
         //CapacityInformation capacityInformation = redisTemplate.boundValueOps(serviceId).get();
         CapacityInformation capacityInformation = null;
-        ObjectMapper mapper = new ObjectMapper();
+
         String jsonCapacityInformation = redisTemplate.boundValueOps(serviceId).get();
         if (jsonCapacityInformation != null) {
 	        try {
@@ -67,7 +72,6 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
 
         List<CapacityInformation> capacityInformationList = new ArrayList<>();
         CapacityInformation capacityInformation;
-        ObjectMapper mapper = new ObjectMapper();
 
         Set<byte[]> keys = redisTemplate.getConnectionFactory().getConnection().keys("*".getBytes());
 
@@ -75,7 +79,6 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
         		capacityInformation = null;
             String key = new String(data);
 
-            //capacityInformation = redisTemplate.boundValueOps(key).get();
             String jsonCapacityInformation = redisTemplate.boundValueOps(key).get();
             if (jsonCapacityInformation != null) {
 	            try {
@@ -107,7 +110,7 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
         logger.debug("Saving Capacity Information {} using Service Id {}", capacityInformation,
                 capacityInformation.getServiceId());
 
-        ObjectMapper mapper = new ObjectMapper();
+
         try {
 	        String jsonCapacityInformation = mapper.writeValueAsString(capacityInformation);
 	        //redisTemplate.boundValueOps(capacityInformation.getServiceId()).set(capacityInformation);
