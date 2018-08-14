@@ -25,13 +25,11 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
 
     private static final Logger logger = LoggerFactory.getLogger(CapacityInformationRepositoryRedisImpl.class);
 
-    //private RedisTemplate<String, CapacityInformation> redisTemplate;
     private RedisTemplate<String, String> redisTemplate;
 
     @Value("${capacity.service.cache.timeToLiveInSeconds}")
     private Integer timeToLiveInSeconds;
 
-    //public CapacityInformationRepositoryRedisImpl(RedisTemplate<String, CapacityInformation> redisTemplate) {
     @Autowired
     public CapacityInformationRepositoryRedisImpl(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -45,7 +43,6 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
 
         logger.debug("Getting Capacity Information for Service Id: {}", serviceId);
 
-        //CapacityInformation capacityInformation = redisTemplate.boundValueOps(serviceId).get();
         CapacityInformation capacityInformation = null;
 
         String jsonCapacityInformation = redisTemplate.boundValueOps(serviceId).get();
@@ -110,7 +107,6 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
         logger.debug("Saving Capacity Information {} using Service Id {}", capacityInformation,
                 capacityInformation.getServiceId());
 
-
         try {
 	        String jsonCapacityInformation = mapper.writeValueAsString(capacityInformation);
 	        //redisTemplate.boundValueOps(capacityInformation.getServiceId()).set(capacityInformation);
@@ -141,16 +137,7 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
 
     @Override
     public void deleteAll() {
-
         throw new UnsupportedOperationException("Delete all is not available for real data store");
-
-//        Set<byte[]> keys = redisTemplate.getConnectionFactory().getConnection().keys("*".getBytes());
-//
-//        for (byte[] data : keys) {
-//
-//            System.out.println("Key = " + new String(data));
-//
-//            redisTemplate.delete(new String(data));
     }
 
 }
