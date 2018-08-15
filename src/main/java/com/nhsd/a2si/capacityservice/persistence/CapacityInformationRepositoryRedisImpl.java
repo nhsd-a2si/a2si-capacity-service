@@ -1,10 +1,9 @@
 package com.nhsd.a2si.capacityservice.persistence;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
+import com.nhsd.a2si.capacityinformation.domain.ServiceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Repository;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Profile({"capacity-service-local-redis",
           "capacity-service-aws-redis",
@@ -102,6 +101,11 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
     }
 
     @Override
+    public String getAllCapacityInformation(List<ServiceIdentifier> in) {
+        return redisTemplate.opsForValue().multiGet(in.stream().map(i -> i.getId()).collect(Collectors.toList())).parallelStream().filter(r -> r != null).collect(Collectors.joining(",", "[", "]"));
+    }
+
+    @Override
     public void saveCapacityInformation(CapacityInformation capacityInformation) {
 
         logger.debug("Saving Capacity Information {} using Service Id {}", capacityInformation,
@@ -109,7 +113,6 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
 
         try {
 	        String jsonCapacityInformation = mapper.writeValueAsString(capacityInformation);
-	        //redisTemplate.boundValueOps(capacityInformation.getServiceId()).set(capacityInformation);
 	        redisTemplate.boundValueOps(capacityInformation.getServiceId()).set(jsonCapacityInformation);
 	        redisTemplate.expire(capacityInformation.getServiceId(), timeToLiveInSeconds, TimeUnit.SECONDS);
 	        

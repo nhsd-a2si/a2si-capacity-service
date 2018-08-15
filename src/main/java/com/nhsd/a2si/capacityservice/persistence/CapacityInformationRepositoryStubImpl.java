@@ -1,6 +1,7 @@
 package com.nhsd.a2si.capacityservice.persistence;
 
 import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
+import com.nhsd.a2si.capacityinformation.domain.ServiceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -102,6 +103,10 @@ public class CapacityInformationRepositoryStubImpl implements CapacityInformatio
         return capacityInformationList;
     }
 
+    @Override
+    public String getAllCapacityInformation(List<ServiceIdentifier> in) {
+        throw new RuntimeException("to do");
+    }
 
     @Override
     public void saveCapacityInformation(CapacityInformation capacityInformation) {

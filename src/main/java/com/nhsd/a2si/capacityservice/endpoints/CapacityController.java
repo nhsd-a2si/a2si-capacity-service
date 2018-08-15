@@ -1,6 +1,7 @@
 package com.nhsd.a2si.capacityservice.endpoints;
 
 import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
+import com.nhsd.a2si.capacityinformation.domain.ServiceIdentifier;
 import com.nhsd.a2si.capacityservice.exceptions.AuthenticationException;
 import com.nhsd.a2si.capacityservice.persistence.CapacityInformationRepository;
 
@@ -78,6 +79,23 @@ public class CapacityController {
             return null;
         }
 
+    }
+
+    @PostMapping(value = "/capacity/services")
+    public String getAllInBatchCapacityInformation(
+            @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
+            @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword,
+            @Valid @RequestBody List<ServiceIdentifier> ids) {
+
+        validateApiCredentials(apiUsername, apiPassword);
+
+        logger.debug("Getting Batch Capacity Information");
+
+        String allCapacityInformation = capacityInformationRepository.getAllCapacityInformation(ids);
+
+        logger.debug("Got All Capacity Information {}", allCapacityInformation);
+
+        return allCapacityInformation;
     }
 
     @GetMapping(value = "/capacity/all")
