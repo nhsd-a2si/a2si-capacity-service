@@ -3,6 +3,7 @@ package com.nhsd.a2si.capacityservice.persistence;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
+import com.nhsd.a2si.capacityinformation.domain.ServiceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Repository;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Profile({"capacity-service-local-redis",
           "capacity-service-aws-redis",
@@ -23,26 +24,26 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
 
     private static final Logger logger = LoggerFactory.getLogger(CapacityInformationRepositoryRedisImpl.class);
 
-    //private RedisTemplate<String, CapacityInformation> redisTemplate;
     private RedisTemplate<String, String> redisTemplate;
 
     @Value("${capacity.service.cache.timeToLiveInSeconds}")
     private Integer timeToLiveInSeconds;
 
-    //public CapacityInformationRepositoryRedisImpl(RedisTemplate<String, CapacityInformation> redisTemplate) {
     @Autowired
     public CapacityInformationRepositoryRedisImpl(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
+
+    @Autowired
+    private ObjectMapper mapper;
 
     @Override
     public CapacityInformation getCapacityInformationByServiceId(String serviceId) {
 
         logger.debug("Getting Capacity Information for Service Id: {}", serviceId);
 
-        //CapacityInformation capacityInformation = redisTemplate.boundValueOps(serviceId).get();
         CapacityInformation capacityInformation = null;
-        ObjectMapper mapper = new ObjectMapper();
+
         String jsonCapacityInformation = redisTemplate.boundValueOps(serviceId).get();
         if (jsonCapacityInformation != null) {
 	        try {
@@ -67,7 +68,6 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
 
         List<CapacityInformation> capacityInformationList = new ArrayList<>();
         CapacityInformation capacityInformation;
-        ObjectMapper mapper = new ObjectMapper();
 
         Set<byte[]> keys = redisTemplate.getConnectionFactory().getConnection().keys("*".getBytes());
 
@@ -75,7 +75,6 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
         		capacityInformation = null;
             String key = new String(data);
 
-            //capacityInformation = redisTemplate.boundValueOps(key).get();
             String jsonCapacityInformation = redisTemplate.boundValueOps(key).get();
             if (jsonCapacityInformation != null) {
 	            try {
@@ -102,15 +101,18 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
     }
 
     @Override
+    public String getAllCapacityInformation(List<ServiceIdentifier> in) {
+        return redisTemplate.opsForValue().multiGet(in.stream().map(i -> i.getId()).collect(Collectors.toList())).parallelStream().filter(r -> r != null).collect(Collectors.joining(",", "[", "]"));
+    }
+
+    @Override
     public void saveCapacityInformation(CapacityInformation capacityInformation) {
 
         logger.debug("Saving Capacity Information {} using Service Id {}", capacityInformation,
                 capacityInformation.getServiceId());
 
-        ObjectMapper mapper = new ObjectMapper();
         try {
 	        String jsonCapacityInformation = mapper.writeValueAsString(capacityInformation);
-	        //redisTemplate.boundValueOps(capacityInformation.getServiceId()).set(capacityInformation);
 	        redisTemplate.boundValueOps(capacityInformation.getServiceId()).set(jsonCapacityInformation);
 	        redisTemplate.expire(capacityInformation.getServiceId(), timeToLiveInSeconds, TimeUnit.SECONDS);
 	        
@@ -138,16 +140,7 @@ public class CapacityInformationRepositoryRedisImpl implements CapacityInformati
 
     @Override
     public void deleteAll() {
-
         throw new UnsupportedOperationException("Delete all is not available for real data store");
-
-//        Set<byte[]> keys = redisTemplate.getConnectionFactory().getConnection().keys("*".getBytes());
-//
-//        for (byte[] data : keys) {
-//
-//            System.out.println("Key = " + new String(data));
-//
-//            redisTemplate.delete(new String(data));
     }
 
 }

@@ -1,7 +1,7 @@
 FROM openjdk:8-jdk-alpine
 VOLUME /tmp
 
-ADD ./target/a2si-capacity-service-0.0.6.jar a2si-capacity-service.jar
+ADD ./target/a2si-capacity-service-0.0.7.jar a2si-capacity-service.jar
 ADD ./keystore.jks keystore.jks
 
 # Expose 7020, the default port used for Capacity Service
