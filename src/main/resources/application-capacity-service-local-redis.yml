@@ -6,7 +6,7 @@ jedis:
 capacity:
   service:
     cache:
-      timeToLiveInSeconds: 60000000
+      timeToLiveInSeconds: 1800
     api:
       username: dummyValue
       password: dummyValue
