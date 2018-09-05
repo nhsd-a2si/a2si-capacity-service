@@ -3,8 +3,11 @@ package com.nhsd.a2si.capacityservice.endpoints;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
 import com.nhsd.a2si.capacityinformation.domain.ServiceIdentifier;
+import com.nhsd.a2si.capacityservice.CapacityInformationImpl;
 import com.nhsd.a2si.capacityservice.exceptions.AuthenticationException;
 import com.nhsd.a2si.capacityservice.persistence.CapacityInformationRepository;
+
+import ch.qos.logback.classic.net.server.ServerSocketAppender;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,7 +148,7 @@ public class CapacityController {
     public void setCapacityInformation(
             @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
             @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword,
-            @Valid @RequestBody CapacityInformation capacityInformation) {
+            @Valid @RequestBody CapacityInformationImpl capacityInformation) {
 
         validateApiCredentials(apiUsername, apiPassword);
 
