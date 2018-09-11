@@ -88,6 +88,14 @@ public class CapacityController {
 
     }
 
+    @PostMapping(value = "/capacities")
+    public void setCapacityInformation(@Valid @RequestBody List<CapacityInformationImpl> items) {
+        for(CapacityInformationImpl i: items){
+            this.setCapacityInformation(i);
+        }
+    }
+
+    // Gets many using the supplied IDs
     @PostMapping(value = "/capacity/services")
     public String getAllInBatchCapacityInformation(
             @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
@@ -142,6 +150,13 @@ public class CapacityController {
 
         return capacityInformationList;
 
+    }
+
+    // Temp until basic auth ticket is merged in.
+    // The compiler will show this as double when the merge is done.
+    // delete this then.
+    public void setCapacityInformation(CapacityInformationImpl capacityInformation){
+        this.setCapacityInformation(capacityServiceApiUsername, capacityServiceApiPassword, capacityInformation);
     }
 
     @PostMapping(value = "/capacity")
