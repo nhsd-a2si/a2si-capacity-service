@@ -1,20 +1,25 @@
 package com.nhsd.a2si.capacityservice.endpoints;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
+import com.nhsd.a2si.capacityinformation.domain.ServiceIdentifier;
+import com.nhsd.a2si.capacityservice.CapacityInformationImpl;
 import com.nhsd.a2si.capacityservice.exceptions.AuthenticationException;
 import com.nhsd.a2si.capacityservice.persistence.CapacityInformationRepository;
+
+import ch.qos.logback.classic.net.server.ServerSocketAppender;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Profile({"!test-capacity-service-local-redis", "!test-capacity-service-local-stub"})
@@ -34,6 +39,9 @@ public class CapacityController {
     public CapacityController(CapacityInformationRepository capacityInformationRepository) {
         this.capacityInformationRepository = capacityInformationRepository;
     }
+
+    @Autowired
+    private ObjectMapper mapper;
 
     @GetMapping(value = "/capacity/{serviceId}")
     public CapacityInformation getCapacityInformation(@PathVariable("serviceId") String serviceId) {
@@ -64,6 +72,38 @@ public class CapacityController {
             return null;
         }
 
+    }
+
+    @PostMapping(value = "/capacity/services")
+    public String getAllInBatchCapacityInformation(@Valid @RequestBody List<ServiceIdentifier> ids) {
+
+        logger.debug("Getting Batch Capacity Information");
+
+        String allCapacityInformation = capacityInformationRepository.getAllCapacityInformation(ids);
+
+        LocalDateTime now = LocalDateTime.now();
+        String nowFormatted = dateTimeFormatter.format(now);
+        ArrayList<CapacityInformation> arrCiWithinTime = new ArrayList<CapacityInformation>();
+        String acceptableCapacityInformation = "";
+        
+        try {
+        	CapacityInformation[] allCi = mapper.readValue(allCapacityInformation, CapacityInformation[].class);
+        	for (CapacityInformation ci : allCi) {
+                LocalDateTime lastUpdated = LocalDateTime.parse(ci.getLastUpdated(), dateTimeFormatter);
+                lastUpdated = lastUpdated.plusSeconds(timeToLiveInSeconds);
+                if (nowFormatted.compareTo(dateTimeFormatter.format(lastUpdated)) <= -1) {
+                	arrCiWithinTime.add(ci);
+                }        		
+        	}
+        	acceptableCapacityInformation = mapper.writeValueAsString(arrCiWithinTime.toArray(new CapacityInformation[] {}));
+        } catch (Exception je) {
+        	logger.error(je.getMessage());
+        }
+        
+        
+        logger.debug("Got Specified Capacity Information within acceptable time {}", acceptableCapacityInformation);
+
+        return acceptableCapacityInformation;
     }
 
     @GetMapping(value = "/capacity/all")

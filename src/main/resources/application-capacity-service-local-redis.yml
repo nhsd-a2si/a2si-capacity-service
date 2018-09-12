@@ -6,7 +6,7 @@ jedis:
 capacity:
   service:
     cache:
-      timeToLiveInSeconds: 60
+      timeToLiveInSeconds: 1800
 
 server:
   ssl:

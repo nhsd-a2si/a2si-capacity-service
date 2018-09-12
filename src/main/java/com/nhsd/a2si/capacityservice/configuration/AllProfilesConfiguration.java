@@ -17,7 +17,8 @@ public class AllProfilesConfiguration {
     public ObjectMapper objectMapper() {
         return new ObjectMapper()
                 .registerModule(new JavaTimeModule())
-                .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
+                .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
 
