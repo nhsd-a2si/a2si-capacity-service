@@ -95,9 +95,25 @@ public class CapacityController {
         }
     }
 
+    @GetMapping(value = "/capacities")
+    public String getAllInBatchCapacityInformation(@Valid @RequestHeader("capacity-id") List<ServiceIdentifier> ids) {
+        return this.postAllInBatchCapacityInformation(ids);
+    }
+
+    // Temp until basic auth ticket is merged in.
+    // The compiler will show this as double when the merge is done.
+    // delete this then.
+    public String postAllInBatchCapacityInformation(List<ServiceIdentifier> ids){
+        return this.postAllInBatchCapacityInformation(capacityServiceApiUsername, capacityServiceApiPassword, ids);
+    }
+
+    /**
+     * Deprecated use GET /capacities with n many capacity-id header parameters.
+     */
+    @Deprecated
     // Gets many using the supplied IDs
     @PostMapping(value = "/capacity/services")
-    public String getAllInBatchCapacityInformation(
+    public String postAllInBatchCapacityInformation(
             @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
             @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword,
             @Valid @RequestBody List<ServiceIdentifier> ids) {
@@ -133,6 +149,7 @@ public class CapacityController {
         return acceptableCapacityInformation;
     }
 
+    // Has only ever been used for testing.
     @GetMapping(value = "/capacity/all")
     public List<CapacityInformation> getAllCapacityInformation(
             @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
