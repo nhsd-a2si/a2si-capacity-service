@@ -37,6 +37,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
@@ -45,9 +49,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.nhsd.a2si</groupId>
             <artifactId>a2si-capacity-information</artifactId>
             <version>1.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-dynamodb</artifactId>
+            <version>1.11.381</version>
         </dependency>
     </dependencies>
 

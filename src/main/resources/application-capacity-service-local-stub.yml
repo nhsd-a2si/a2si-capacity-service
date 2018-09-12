@@ -2,9 +2,6 @@ capacity:
   service:
     cache:
       timeToLiveInSeconds: 60
-    api:
-      username: dummyValue
-      password: dummyValue
 
 server:
   ssl:
