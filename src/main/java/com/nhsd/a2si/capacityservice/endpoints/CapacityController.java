@@ -72,7 +72,7 @@ public class CapacityController {
     }
 
     @GetMapping(value = "/capacities")
-    public String getManyCapacityInformationByIDs(@Valid @RequestHeader("service-id") List<ServiceIdentifier> ids) {
+    public String getManyCapacityInformationByIDs(@Valid @RequestHeader("serviceId") List<ServiceIdentifier> ids) {
 
         logger.debug("Getting Batch Capacity Information");
 
