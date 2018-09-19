@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.Objects;
 
 @Component
-@Profile({"capacity-service-local-redis", "test-capacity-service-local-redis"})
+@Profile({"capacity-service-aws-redis", "capacity-service-aws-stub"})
 public class UserAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
@@ -40,7 +40,7 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
         final String credentials = authentication.getCredentials().toString();
         Item item = getItemByUsername(username);
         if(Objects.nonNull(item)) {
-            if(passwordEncoder.matches(authentication.getCredentials().toString(), item.getString("SALTED_PASSWORD"))){
+            if(passwordEncoder.matches(authentication.getCredentials().toString(), item.getString(""))){
                 return new UsernamePasswordAuthenticationToken(username, credentials, Collections.emptySet());
             }
         }
