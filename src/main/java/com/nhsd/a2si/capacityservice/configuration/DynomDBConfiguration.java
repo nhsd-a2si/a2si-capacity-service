@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile({"capacity-service-aws-redis", "capacity-service-aws-stub"})
+//@Profile({"capacity-service-aws-redis", "capacity-service-aws-stub"})
 public class DynomDBConfiguration {
 
     @Value("${amazon.aws.dynamo.endpoint}")
