@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.Objects;
 
 @Component
-//@Profile({"capacity-service-aws-redis", "capacity-service-aws-stub"})
+@Profile({"capacity-service-aws-redis", "capacity-service-aws-stub"})
 public class UserAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
