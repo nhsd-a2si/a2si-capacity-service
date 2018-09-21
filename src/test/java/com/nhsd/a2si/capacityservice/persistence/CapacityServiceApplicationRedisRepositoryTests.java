@@ -61,7 +61,6 @@ public class CapacityServiceApplicationRedisRepositoryTests {
 
         capacityInformation = capacityInformationRepository.getCapacityInformationByServiceId(defaultServiceId);
         assertEquals(capacityInformation.getServiceId(), defaultServiceId);
-        assertEquals(capacityInformation.getMessage(), CapacityInformation.messageTemplate);
         assertEquals(capacityInformation.getLastUpdated(), lastUpdatedString);
     }
 

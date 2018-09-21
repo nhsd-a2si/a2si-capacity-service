@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
 import com.nhsd.a2si.capacityinformation.domain.ServiceIdentifier;
 import com.nhsd.a2si.capacityservice.CapacityInformationImpl;
-import com.nhsd.a2si.capacityservice.exceptions.AuthenticationException;
 import com.nhsd.a2si.capacityservice.persistence.CapacityInformationRepository;
-
-import ch.qos.logback.classic.net.server.ServerSocketAppender;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,18 +28,9 @@ public class CapacityController {
 
     private static final Logger logger = LoggerFactory.getLogger(CapacityController.class);
 
-    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(CapacityInformation.STRING_DATE_FORMAT);
 
     private CapacityInformationRepository capacityInformationRepository;
-
-    private static final String capacityServiceApiUsernameHttpHeaderName = "capacity-service-api-username";
-    private static final String capacityServiceApiPasswordHttpHeaderName = "capacity-service-api-password";
-
-    @Value("${capacity.service.api.username}")
-    private String capacityServiceApiUsername;
-
-    @Value("${capacity.service.api.password}")
-    private String capacityServiceApiPassword;
 
     @Autowired
     public CapacityController(CapacityInformationRepository capacityInformationRepository) {
@@ -53,12 +41,7 @@ public class CapacityController {
     private ObjectMapper mapper;
 
     @GetMapping(value = "/capacity/{serviceId}")
-    public CapacityInformation getCapacityInformation(
-            @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
-            @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword,
-            @PathVariable("serviceId") String serviceId) {
-
-        validateApiCredentials(apiUsername, apiPassword);
+    public CapacityInformation getOneCapacityInformationByID(@PathVariable("serviceId") String serviceId) {
 
         CapacityInformation capacityInformation;
 
@@ -88,13 +71,8 @@ public class CapacityController {
 
     }
 
-    @PostMapping(value = "/capacity/services")
-    public String getAllInBatchCapacityInformation(
-            @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
-            @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword,
-            @Valid @RequestBody List<ServiceIdentifier> ids) {
-
-        validateApiCredentials(apiUsername, apiPassword);
+    @GetMapping(value = "/capacities")
+    public String getManyCapacityInformationByIDs(@Valid @RequestHeader("serviceId") List<ServiceIdentifier> ids) {
 
         logger.debug("Getting Batch Capacity Information");
 
@@ -104,53 +82,29 @@ public class CapacityController {
         String nowFormatted = dateTimeFormatter.format(now);
         ArrayList<CapacityInformation> arrCiWithinTime = new ArrayList<CapacityInformation>();
         String acceptableCapacityInformation = "";
-        
+
         try {
-        	CapacityInformation[] allCi = mapper.readValue(allCapacityInformation, CapacityInformation[].class);
-        	for (CapacityInformation ci : allCi) {
+            CapacityInformation[] allCi = mapper.readValue(allCapacityInformation, CapacityInformation[].class);
+            for (CapacityInformation ci : allCi) {
                 LocalDateTime lastUpdated = LocalDateTime.parse(ci.getLastUpdated(), dateTimeFormatter);
                 lastUpdated = lastUpdated.plusSeconds(timeToLiveInSeconds);
                 if (nowFormatted.compareTo(dateTimeFormatter.format(lastUpdated)) <= -1) {
-                	arrCiWithinTime.add(ci);
-                }        		
-        	}
-        	acceptableCapacityInformation = mapper.writeValueAsString(arrCiWithinTime.toArray(new CapacityInformation[] {}));
+                    arrCiWithinTime.add(ci);
+                }
+            }
+            acceptableCapacityInformation = mapper.writeValueAsString(arrCiWithinTime.toArray(new CapacityInformation[] {}));
         } catch (Exception je) {
-        	logger.error(je.getMessage());
+            logger.error(je.getMessage());
         }
-        
-        
+
+
         logger.debug("Got Specified Capacity Information within acceptable time {}", acceptableCapacityInformation);
 
         return acceptableCapacityInformation;
     }
 
-    @GetMapping(value = "/capacity/all")
-    public List<CapacityInformation> getAllCapacityInformation(
-            @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
-            @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword) {
-
-        validateApiCredentials(apiUsername, apiPassword);
-
-        List<CapacityInformation> capacityInformationList;
-
-        logger.debug("Getting All Capacity Information");
-
-        capacityInformationList = capacityInformationRepository.getAllCapacityInformation();
-
-        logger.debug("Got All Capacity Information {}", capacityInformationList);
-
-        return capacityInformationList;
-
-    }
-
     @PostMapping(value = "/capacity")
-    public void setCapacityInformation(
-            @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
-            @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword,
-            @Valid @RequestBody CapacityInformationImpl capacityInformation) {
-
-        validateApiCredentials(apiUsername, apiPassword);
+    public void postOneCapacityInformation(@Valid @RequestBody CapacityInformationImpl capacityInformation) {
 
         logger.info("Storing Capacity Information for Service Id: {} with value of {}",
                 capacityInformation.getServiceId(), capacityInformation);
@@ -167,13 +121,36 @@ public class CapacityController {
 
     }
 
-    @DeleteMapping(value = "/capacity/{serviceId}")
-    public void deleteCapacityInformation(
-            @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
-            @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword,
-            @PathVariable("serviceId") String serviceId) {
+    @PostMapping(value = "/capacities")
+    public void postManyCapacityInformation(@Valid @RequestBody List<CapacityInformationImpl> items) {
+        for(CapacityInformationImpl cap: items){
+            this.postOneCapacityInformation(cap);
+        }
+    }
 
-        validateApiCredentials(apiUsername, apiPassword);
+
+
+
+    //  |  The methods bellow are for the Testers only
+    //  V  Delete this comment once the methods are annotated with a Test security role.
+
+    @GetMapping(value = "/capacity/all")
+    public List<CapacityInformation> getAllCapacityInformation() {
+
+        List<CapacityInformation> capacityInformationList;
+
+        logger.debug("Getting All Capacity Information");
+
+        capacityInformationList = capacityInformationRepository.getAllCapacityInformation();
+
+        logger.debug("Got All Capacity Information {}", capacityInformationList);
+
+        return capacityInformationList;
+
+    }
+
+    @DeleteMapping(value = "/capacity/{serviceId}")
+    public void deleteOneCapacityInformationById(@PathVariable("serviceId") String serviceId) {
 
         logger.debug("Deleting Capacity Information for Service Id: {}", serviceId);
 
@@ -184,24 +161,12 @@ public class CapacityController {
     }
 
     @DeleteMapping(value = "/capacity/all")
-    public void deleteAllCapacityInformation(
-            @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
-            @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword) {
-
-        validateApiCredentials(apiUsername, apiPassword);
+    public void deleteManyCapacityInformation() {
 
         capacityInformationRepository.deleteAll();
 
         logger.debug("Deleted All Capacity Information");
-
     }
 
-    private void validateApiCredentials(String apiUsername, String apiPassword) {
-
-        if (!capacityServiceApiUsername.equals(apiUsername) || !capacityServiceApiPassword.equals(apiPassword)) {
-            throw new AuthenticationException("Username and Password could not be authenticated");
-        }
-
-    }
 
 }
