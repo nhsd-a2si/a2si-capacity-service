@@ -5,7 +5,7 @@
 
     <groupId>com.nhsd.a2si</groupId>
     <artifactId>a2si-capacity-service</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <packaging>jar</packaging>
 
     <name>a2si-capacity-service</name>
