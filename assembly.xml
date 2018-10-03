@@ -15,9 +15,15 @@
             <outputDirectory>target</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${basedir}</directory>
+            <directory>${project.build.directory}</directory>
             <includes>
                 <include>Dockerfile</include>
+            </includes>
+            <outputDirectory>.</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}</directory>
+            <includes>
                 <include>keystore.jks</include>
                 <include>.ebextensions/iptables.config</include>
             </includes>
