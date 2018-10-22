@@ -1,6 +1,12 @@
 spring:
   application:
     name: a2si-capacity-service
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
 
 server:
   port: 7020
