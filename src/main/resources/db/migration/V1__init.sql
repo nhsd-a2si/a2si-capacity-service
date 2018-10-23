@@ -13,7 +13,7 @@ CREATE TABLE wait_times (
   service_id int REFERENCES service(service_id),
   wait_time_in_minutes INT,
   region VARCHAR(100),
-  porovider VARCHAR(100),
+  provider VARCHAR(100),
   created TIMESTAMP DEFAULT NOW(),
   modified TIMESTAMP
 );

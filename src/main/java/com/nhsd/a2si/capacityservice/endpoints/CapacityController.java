@@ -6,6 +6,7 @@ import com.nhsd.a2si.capacityinformation.domain.ServiceIdentifier;
 import com.nhsd.a2si.capacityservice.CapacityInformationImpl;
 import com.nhsd.a2si.capacityservice.persistence.CapacityInformationRepository;
 
+import com.nhsd.a2si.capacityservice.storage.WaitTimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -39,6 +42,9 @@ public class CapacityController {
 
     @Autowired
     private ObjectMapper mapper;
+
+    @Autowired
+    private WaitTimeService waitTimeService;
 
     @GetMapping(value = "/capacity/{serviceId}")
     public CapacityInformation getOneCapacityInformationByID(@PathVariable("serviceId") String serviceId) {
@@ -114,7 +120,14 @@ public class CapacityController {
             capacityInformation.setLastUpdated(dateTimeFormatter.format(localDateTime));
         }
 
-        capacityInformationRepository.saveCapacityInformation(capacityInformation);
+        new Thread(() -> capacityInformationRepository.saveCapacityInformation(capacityInformation)).start();
+        new Thread(() -> {
+            try {
+                waitTimeService.storeWaitTime("made up", capacityInformation.getWaitingTimeMins(), new SimpleDateFormat(CapacityInformation.STRING_DATE_FORMAT).parse(capacityInformation.getLastUpdated()), "SouthWest", "UK");
+            } catch (ParseException e) {
+                logger.error("Unable to parse date {0} into Java Date object", capacityInformation.getLastUpdated());
+            }
+        }).start();
 
         logger.debug("Stored Capacity Information for Service Id: {} with value of {}",
                 capacityInformation.getServiceId(), capacityInformation);

@@ -27,6 +27,13 @@ public class WaitTime {
     @Size(max = 100)
     private String provider;
 
+    @Column(name = "wait_time_in_minutes")
+    private long waitTimeInMinutes;
+
+    @ManyToOne
+    @JoinColumn(name="service_id")
+    private Service service;
+
     public long getId() {
         return id;
     }
@@ -57,5 +64,21 @@ public class WaitTime {
 
     public void setProvider(String provider) {
         this.provider = provider;
+    }
+
+    public Service getService() {
+        return service;
+    }
+
+    public void setService(Service service) {
+        this.service = service;
+    }
+
+    public long getWaitTimeInMinutes() {
+        return waitTimeInMinutes;
+    }
+
+    public void setWaitTimeInMinutes(long waitTimeInMinutes) {
+        this.waitTimeInMinutes = waitTimeInMinutes;
     }
 }
