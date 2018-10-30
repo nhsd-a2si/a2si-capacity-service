@@ -5,16 +5,22 @@ import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
 import com.nhsd.a2si.capacityinformation.domain.ServiceIdentifier;
 import com.nhsd.a2si.capacityservice.CapacityInformationImpl;
 import com.nhsd.a2si.capacityservice.persistence.CapacityInformationRepository;
-
-import com.nhsd.a2si.capacityservice.storage.WaitTimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestTemplate;
+import org.json.JSONObject;
 import javax.validation.Valid;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -35,16 +41,19 @@ public class CapacityController {
 
     private CapacityInformationRepository capacityInformationRepository;
 
+    private RestTemplate restTemplate;
+
+    @Value("${capacity.history.service.api.base.url}")
+    private String historyService;
+
     @Autowired
-    public CapacityController(CapacityInformationRepository capacityInformationRepository) {
+    public CapacityController(CapacityInformationRepository capacityInformationRepository, RestTemplateBuilder builder) {
         this.capacityInformationRepository = capacityInformationRepository;
+        this.restTemplate = builder.build();
     }
 
     @Autowired
     private ObjectMapper mapper;
-
-    @Autowired
-    private WaitTimeService waitTimeService;
 
     @GetMapping(value = "/capacity/{serviceId}")
     public CapacityInformation getOneCapacityInformationByID(@PathVariable("serviceId") String serviceId) {
@@ -112,26 +121,51 @@ public class CapacityController {
     @PostMapping(value = "/capacity")
     public void postOneCapacityInformation(@Valid @RequestBody CapacityInformationImpl capacityInformation) {
 
-        logger.info("Storing Capacity Information for Service Id: {} with value of {}",
-                capacityInformation.getServiceId(), capacityInformation);
+        // Storage in Capacity Service (Redis)
+        new Thread(() -> {
+            logger.info("Storing Capacity Information for Service Id: {} with value of {} in Redis.", capacityInformation.getServiceId(), capacityInformation);
+            capacityInformationRepository.saveCapacityInformation(capacityInformation);
+            logger.debug("Stored Capacity Information for Service Id: {} with value of {} in Redis", capacityInformation.getServiceId(), capacityInformation);
+        }).start();
 
-        if (capacityInformation.getLastUpdated() == null) {
-            LocalDateTime localDateTime = LocalDateTime.now();
-            capacityInformation.setLastUpdated(dateTimeFormatter.format(localDateTime));
-        }
-
-        new Thread(() -> capacityInformationRepository.saveCapacityInformation(capacityInformation)).start();
+        // Storage in Capacity History Service (HTTP POST)
         new Thread(() -> {
             try {
-                waitTimeService.storeWaitTime("made up", capacityInformation.getWaitingTimeMins(), new SimpleDateFormat(CapacityInformation.STRING_DATE_FORMAT).parse(capacityInformation.getLastUpdated()), "SouthWest", "UK");
+                logger.info("Sending Capacity Information for Service Id: {} with value of {} to Capacity History Service", capacityInformation.getServiceId(), capacityInformation);
+                sendDataToCapacityHistoryService(new JSONObject()
+                        .put("service", new JSONObject()
+                                .put("id", capacityInformation.getServiceId())
+                                .put("name", capacityInformation.getServiceName())
+                        )
+                        .put("waitTimeInMinutes", capacityInformation.getWaitingTimeMins())
+                        .put("updated", new SimpleDateFormat(CapacityInformation.STRING_DATE_FORMAT).parse(capacityInformation.getLastUpdated()))
+                        .put("provider", new JSONObject()
+                                .put("name", "Derbyshire Health Care")
+                                .put("region", "Leicester, Leicestershire and Rutland")
+                        ));
             } catch (ParseException e) {
-                logger.error("Unable to parse date {0} into Java Date object", capacityInformation.getLastUpdated());
+                logger.error("Unable to parse date '"+capacityInformation.getLastUpdated()+"' into Java Date object", e.getMessage());
             }
         }).start();
 
-        logger.debug("Stored Capacity Information for Service Id: {} with value of {}",
-                capacityInformation.getServiceId(), capacityInformation);
+    }
 
+    private void sendDataToCapacityHistoryService(JSONObject object){
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set("Content-Type", "application/json");
+        try {
+            logger.debug("Attempting to call Capacity History Service");
+            ResponseEntity<String> result = restTemplate.postForEntity(new URI(historyService + "/wait-times/"), new HttpEntity <String> (object.toString(), httpHeaders), String.class);
+            if(result.getStatusCode().value() == 201){
+                logger.debug("Capacity History Service has created: " + result.getHeaders().get("Location"));
+            }else {
+                logger.error("The JSON object "+object.toString()+" has not been accepted by Capacity History Service("+historyService+"/wait-times/)");
+            }
+        } catch (URISyntaxException e) {
+            logger.error("Unacceptable 'capacity.history.service.api.base.url' value", e.getMessage());
+        } catch (ResourceAccessException e) {
+            logger.error("Capacity History Service("+historyService+"/wait-times/) is offline. Missing data: " + object.toString());
+        }
     }
 
     @PostMapping(value = "/capacities")
@@ -140,8 +174,6 @@ public class CapacityController {
             this.postOneCapacityInformation(cap);
         }
     }
-
-
 
 
     //  |  The methods bellow are for the Testers only
