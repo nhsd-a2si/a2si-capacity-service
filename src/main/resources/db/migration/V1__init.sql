@@ -10,7 +10,7 @@ CREATE TABLE log_header (
 
 CREATE TABLE log_detail (
   id BIGSERIAL PRIMARY KEY,
-  header_id BIGINT REFERENCES log_detail(id),
+  header_id BIGINT REFERENCES log_header(id),
   service_id VARCHAR(30),
   timestamp TIMESTAMP DEFAULT NOW(),
   wait_time_in_minutes INT,
