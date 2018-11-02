@@ -5,3 +5,9 @@ capacity:
     api:
       username: dummyValue
       password: dummyValue
+
+spring:
+  datasource:
+    url: jdbc:postgresql://[::1]:5432/capacity-service-two
+    username: postgres
+    password: root
