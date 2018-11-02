@@ -1,5 +1,9 @@
 package com.nhsd.a2si.capacityservice.persistence.jpa;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -17,6 +21,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name="log_detail")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DetailLog {
 
     @Id
@@ -24,10 +29,12 @@ public class DetailLog {
     @Column(name = "id")
     private Long id;
 
+    @JsonIgnore
     @JoinColumn(name = "header_id", nullable = false)
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     private HeaderLog headerLog;
 
+    @JsonProperty("service")
     @Column(name = "service_id")
     private String serviceId;
 
@@ -35,10 +42,10 @@ public class DetailLog {
     private Date timestamp;
 
     @Column(name = "wait_time_in_minutes")
-    private int waitTimeInMinutes;
+    private Integer waitTimeInMinutes;
 
     @Column(name = "age_in_minutes")
-    private  int ageInMinutes;
+    private Integer ageInMinutes;
 
     public Long getId() {
         return id;
@@ -64,19 +71,19 @@ public class DetailLog {
         this.timestamp = timestamp;
     }
 
-    public int getWaitTimeInMinutes() {
+    public Integer getWaitTimeInMinutes() {
         return waitTimeInMinutes;
     }
 
-    public void setWaitTimeInMinutes(int waitTimeInMinutes) {
+    public void setWaitTimeInMinutes(Integer waitTimeInMinutes) {
         this.waitTimeInMinutes = waitTimeInMinutes;
     }
 
-    public int getAgeInMinutes() {
+    public Integer getAgeInMinutes() {
         return ageInMinutes;
     }
 
-    public void setAgeInMinutes(int ageInMinutes) {
+    public void setAgeInMinutes(Integer ageInMinutes) {
         this.ageInMinutes = ageInMinutes;
     }
 

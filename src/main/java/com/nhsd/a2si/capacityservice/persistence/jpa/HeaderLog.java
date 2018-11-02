@@ -1,5 +1,8 @@
 package com.nhsd.a2si.capacityservice.persistence.jpa;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,6 +21,7 @@ import java.util.List;
  */
 @Entity
 @Table(name="log_header")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class HeaderLog {
 
     @Id
@@ -43,6 +47,7 @@ public class HeaderLog {
     @Column(name = "timestamp")
     private Date timestamp;
 
+    @JsonProperty("details")
     @OneToMany(mappedBy = "headerLog", cascade = CascadeType.ALL)
     private List<DetailLog> detailLogs = new ArrayList<>();
 
