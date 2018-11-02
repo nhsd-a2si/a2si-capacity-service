@@ -6,6 +6,8 @@ import com.nhsd.a2si.capacityinformation.domain.ServiceIdentifier;
 import com.nhsd.a2si.capacityservice.CapacityInformationImpl;
 import com.nhsd.a2si.capacityservice.exceptions.AuthenticationException;
 import com.nhsd.a2si.capacityservice.persistence.CapacityInformationRepository;
+import com.nhsd.a2si.capacityservice.persistence.jpa.HeaderLog;
+import com.nhsd.a2si.capacityservice.persistence.jpa.LogService;
 
 import ch.qos.logback.classic.net.server.ServerSocketAppender;
 
@@ -20,11 +22,15 @@ import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Profile({"!test-capacity-service-local-redis", "!test-capacity-service-local-stub"})
 @RestController
 public class CapacityController {
+
+    @Autowired
+    private LogService logService;
 
     @Value("${capacity.service.cache.timeToLiveInSeconds}")
     private Integer timeToLiveInSeconds;
@@ -58,6 +64,8 @@ public class CapacityController {
             @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword,
             @PathVariable("serviceId") String serviceId) {
 
+    	saveLogHeader("GET", "/capacity/" + serviceId, apiUsername);
+    	
         validateApiCredentials(apiUsername, apiPassword);
 
         CapacityInformation capacityInformation;
@@ -94,6 +102,8 @@ public class CapacityController {
             @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword,
             @Valid @RequestBody List<ServiceIdentifier> ids) {
 
+    	saveLogHeader("POST", "/capacity/services", apiUsername);
+    	
         validateApiCredentials(apiUsername, apiPassword);
 
         logger.debug("Getting Batch Capacity Information");
@@ -130,6 +140,8 @@ public class CapacityController {
             @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
             @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword) {
 
+    	saveLogHeader("GET", "/capacity/all", apiUsername);
+    	
         validateApiCredentials(apiUsername, apiPassword);
 
         List<CapacityInformation> capacityInformationList;
@@ -149,6 +161,8 @@ public class CapacityController {
             @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
             @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword,
             @Valid @RequestBody CapacityInformationImpl capacityInformation) {
+
+    	saveLogHeader("POST", "/capacity", apiUsername);
 
         validateApiCredentials(apiUsername, apiPassword);
 
@@ -173,6 +187,8 @@ public class CapacityController {
             @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword,
             @PathVariable("serviceId") String serviceId) {
 
+    	saveLogHeader("DELETE", "/capacity/" + serviceId, apiUsername);
+    	
         validateApiCredentials(apiUsername, apiPassword);
 
         logger.debug("Deleting Capacity Information for Service Id: {}", serviceId);
@@ -187,6 +203,8 @@ public class CapacityController {
     public void deleteAllCapacityInformation(
             @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
             @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword) {
+
+    	saveLogHeader("DELETE", "/capacity/all", apiUsername);
 
         validateApiCredentials(apiUsername, apiPassword);
 
@@ -204,4 +222,18 @@ public class CapacityController {
 
     }
 
+    private HeaderLog saveLogHeader(String action, String endpoint, String username) {
+    	HeaderLog headerLog = new HeaderLog();
+
+    	headerLog.setAction(action);
+    	headerLog.setComponent("capacity-service");
+    	headerLog.setEndpoint(endpoint);
+    	headerLog.setHashcode(null);
+    	headerLog.setTimestamp(new Date());
+    	headerLog.setUserId(username);
+    	
+    	logService.saveHeader(headerLog);
+    	return headerLog;
+    }
+    
 }
