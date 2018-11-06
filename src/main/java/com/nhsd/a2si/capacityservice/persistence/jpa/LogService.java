@@ -1,6 +1,8 @@
 package com.nhsd.a2si.capacityservice.persistence.jpa;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,5 +29,12 @@ public class LogService {
         List<HeaderLog> headerLogs = new ArrayList<>();
         headerLogRepository.findAll().forEach(headerLogs::add);
         return headerLogs;
+    }    
+
+    public List<HeaderLog> getLatestHeaderLogs() {
+        List<HeaderLog> headerLogs = new ArrayList<>();
+        headerLogRepository.findFirst100ByOrderByIdDesc().forEach(headerLogs::add);
+        return headerLogs;
     }
+
 }

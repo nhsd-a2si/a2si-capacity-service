@@ -1,5 +1,6 @@
 package com.nhsd.a2si.capacityservice.persistence.jpa;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -45,6 +46,7 @@ public class HeaderLog {
     private String hashcode;
 
     @Column(name = "timestamp")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date timestamp;
 
     @JsonProperty("details")

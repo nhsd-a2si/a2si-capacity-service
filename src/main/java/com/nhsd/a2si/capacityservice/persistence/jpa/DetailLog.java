@@ -1,5 +1,6 @@
 package com.nhsd.a2si.capacityservice.persistence.jpa;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,6 +40,7 @@ public class DetailLog {
     private String serviceId;
 
     @Column(name = "timestamp")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date timestamp;
 
     @Column(name = "wait_time_in_minutes")

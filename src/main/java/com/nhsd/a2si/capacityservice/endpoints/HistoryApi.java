@@ -19,4 +19,9 @@ public class HistoryApi {
         return logService.getAllHeaderLogs();
     }
 
+    @GetMapping(value = "/log/get-latest")
+    public List<HeaderLog> getLatest(){
+        return logService.getLatestHeaderLogs();
+    }
+
 }
