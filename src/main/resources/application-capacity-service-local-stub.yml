@@ -1,7 +1,8 @@
 capacity:
   service:
+  	duration.wait.time.valid.seconds: 60
     cache:
-      timeToLiveInSeconds: 60
+      timeToLiveInSeconds: 120
     api:
       username: dummyValue
       password: dummyValue

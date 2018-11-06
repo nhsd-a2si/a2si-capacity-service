@@ -6,6 +6,8 @@ import com.nhsd.a2si.capacityinformation.domain.ServiceIdentifier;
 import com.nhsd.a2si.capacityservice.CapacityInformationImpl;
 import com.nhsd.a2si.capacityservice.exceptions.AuthenticationException;
 import com.nhsd.a2si.capacityservice.persistence.CapacityInformationRepository;
+import com.nhsd.a2si.capacityservice.persistence.jpa.DetailLog;
+import com.nhsd.a2si.capacityservice.persistence.jpa.DetailLogRepository;
 import com.nhsd.a2si.capacityservice.persistence.jpa.HeaderLog;
 import com.nhsd.a2si.capacityservice.persistence.jpa.LogService;
 
@@ -35,6 +37,9 @@ public class CapacityController {
     @Value("${capacity.service.cache.timeToLiveInSeconds}")
     private Integer timeToLiveInSeconds;
 
+    @Value("${capacity.service.duration.wait.time.valid.seconds}")
+    private Integer durationWaitTimeValidSeconds;
+
     private static final Logger logger = LoggerFactory.getLogger(CapacityController.class);
 
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -43,6 +48,7 @@ public class CapacityController {
 
     private static final String capacityServiceApiUsernameHttpHeaderName = "capacity-service-api-username";
     private static final String capacityServiceApiPasswordHttpHeaderName = "capacity-service-api-password";
+    private static final String logHeaderIdName = "log-header-id";
 
     @Value("${capacity.service.api.username}")
     private String capacityServiceApiUsername;
@@ -85,7 +91,7 @@ public class CapacityController {
         // else
         // return the capacity information
         LocalDateTime lastUpdated = LocalDateTime.parse(capacityInformation.getLastUpdated(), dateTimeFormatter);
-        lastUpdated = lastUpdated.plusSeconds(timeToLiveInSeconds);
+        lastUpdated = lastUpdated.plusSeconds(durationWaitTimeValidSeconds);
 
         LocalDateTime now = LocalDateTime.now();
         if (dateTimeFormatter.format(now).compareTo(dateTimeFormatter.format(lastUpdated)) <= -1) {
@@ -100,6 +106,7 @@ public class CapacityController {
     public String getAllInBatchCapacityInformation(
             @RequestHeader(capacityServiceApiUsernameHttpHeaderName) String apiUsername,
             @RequestHeader(capacityServiceApiPasswordHttpHeaderName) String apiPassword,
+            @RequestHeader(logHeaderIdName) Long logHeaderId,
             @Valid @RequestBody List<ServiceIdentifier> ids) {
 
     	saveLogHeader("POST", "/capacity/services", apiUsername);
@@ -107,6 +114,10 @@ public class CapacityController {
         validateApiCredentials(apiUsername, apiPassword);
 
         logger.debug("Getting Batch Capacity Information");
+        
+        if (logHeaderId == null) {
+        	logger.debug("Cannot log the wait time to DB because the Header Log ID was not supplied in the http header");
+        }
 
         String allCapacityInformation = capacityInformationRepository.getAllCapacityInformation(ids);
 
@@ -115,18 +126,58 @@ public class CapacityController {
         ArrayList<CapacityInformation> arrCiWithinTime = new ArrayList<CapacityInformation>();
         String acceptableCapacityInformation = "";
         
+        ArrayList<String> arlServicesWithWaitTimes = new ArrayList<>();
         try {
         	CapacityInformation[] allCi = mapper.readValue(allCapacityInformation, CapacityInformation[].class);
+            if (logHeaderId != null) {
+                logger.debug("Logging services with wait times to DB");
+            }
         	for (CapacityInformation ci : allCi) {
                 LocalDateTime lastUpdated = LocalDateTime.parse(ci.getLastUpdated(), dateTimeFormatter);
-                lastUpdated = lastUpdated.plusSeconds(timeToLiveInSeconds);
-                if (nowFormatted.compareTo(dateTimeFormatter.format(lastUpdated)) <= -1) {
+                LocalDateTime lastUpdated_plusTimeToLive = lastUpdated.plusSeconds(durationWaitTimeValidSeconds);
+                if (nowFormatted.compareTo(dateTimeFormatter.format(lastUpdated_plusTimeToLive)) <= -1) {
                 	arrCiWithinTime.add(ci);
-                }        		
+                }                     
+
+                // Log Waiting time
+                if (logHeaderId != null) {
+	                HeaderLog headerLog = new HeaderLog();
+	                headerLog.setId(logHeaderId);
+	                DetailLog detailLog = new DetailLog();
+	                detailLog.setHeaderLog(headerLog);
+	                detailLog.setServiceId(ci.getServiceId());
+	                detailLog.setTimestamp(new Date());
+	                detailLog.setWaitTimeInMinutes(ci.getWaitingTimeMins());
+	                detailLog.setAgeInMinutes((int)java.time.temporal.ChronoUnit.MINUTES.between(lastUpdated, now));
+	                logService.saveDetails(detailLog);
+	                logger.debug("Logged service with wait time to DB. The detail ID is " + detailLog.getId());
+                }
+                arlServicesWithWaitTimes.add(ci.getServiceId());
+                
         	}
         	acceptableCapacityInformation = mapper.writeValueAsString(arrCiWithinTime.toArray(new CapacityInformation[] {}));
         } catch (Exception je) {
         	logger.error(je.getMessage());
+        }
+ 
+        // Log Services without Waiting times
+        if (logHeaderId != null) {
+        	logger.debug("Logging services without wait times to DB");
+        	for (ServiceIdentifier sid : ids) {
+        		if (!arlServicesWithWaitTimes.contains(sid.getId())) {
+	                HeaderLog headerLog = new HeaderLog();
+	                headerLog.setId(logHeaderId);
+	                DetailLog detailLog = new DetailLog();
+	                detailLog.setHeaderLog(headerLog);
+	                detailLog.setServiceId(sid.getId());
+	                detailLog.setTimestamp(new Date());
+	                detailLog.setWaitTimeInMinutes(null);
+	                detailLog.setAgeInMinutes(null);
+	                logService.saveDetails(detailLog);
+	                logger.debug("Logged service without wait time to DB. The detail ID is " + detailLog.getId());
+         			
+        		}
+        	}
         }
         
         

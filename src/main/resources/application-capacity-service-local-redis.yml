@@ -5,8 +5,9 @@ jedis:
 
 capacity:
   service:
+  	duration.wait.time.valid.seconds: 1800
     cache:
-      timeToLiveInSeconds: 1800
+      timeToLiveInSeconds: 3600
     api:
       username: dummyValue
       password: dummyValue
