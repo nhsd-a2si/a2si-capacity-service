@@ -1,10 +1,21 @@
 package com.nhsd.a2si.capacityservice.endpoints;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
 import com.nhsd.a2si.capacityinformation.domain.ServiceIdentifier;
 import com.nhsd.a2si.capacityservice.CapacityInformationImpl;
 import com.nhsd.a2si.capacityservice.persistence.CapacityInformationRepository;
+
+import com.nhsd.a2si.capacityservice.persistence.jpa.DetailLog;
+import com.nhsd.a2si.capacityservice.persistence.jpa.DetailLogRepository;
+import com.nhsd.a2si.capacityservice.persistence.jpa.HeaderLog;
+import com.nhsd.a2si.capacityservice.persistence.jpa.LogService;
+
+import ch.qos.logback.classic.net.server.ServerSocketAppender;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +30,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.json.JSONObject;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
@@ -26,14 +38,21 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Profile({"!test-capacity-service-local-redis", "!test-capacity-service-local-stub"})
 @RestController
 public class CapacityController {
 
+    @Autowired
+    private LogService logService;
+
     @Value("${capacity.service.cache.timeToLiveInSeconds}")
     private Integer timeToLiveInSeconds;
+
+    @Value("${capacity.service.duration.wait.time.valid.seconds}")
+    private Integer durationWaitTimeValidSeconds;
 
     private static final Logger logger = LoggerFactory.getLogger(CapacityController.class);
 
@@ -42,6 +61,9 @@ public class CapacityController {
     private CapacityInformationRepository capacityInformationRepository;
 
     private RestTemplate restTemplate;
+
+    private static final String logHeaderIdName = "log-header-id";
+
 
     @Value("${capacity.history.service.api.base.url}")
     private String historyService;
@@ -75,7 +97,7 @@ public class CapacityController {
         // else
         // return the capacity information
         LocalDateTime lastUpdated = LocalDateTime.parse(capacityInformation.getLastUpdated(), dateTimeFormatter);
-        lastUpdated = lastUpdated.plusSeconds(timeToLiveInSeconds);
+        lastUpdated = lastUpdated.plusSeconds(durationWaitTimeValidSeconds);
 
         LocalDateTime now = LocalDateTime.now();
         if (dateTimeFormatter.format(now).compareTo(dateTimeFormatter.format(lastUpdated)) <= -1) {
@@ -87,9 +109,14 @@ public class CapacityController {
     }
 
     @GetMapping(value = "/capacities")
-    public String getManyCapacityInformationByIDs(@Valid @RequestHeader("serviceId") List<ServiceIdentifier> ids) {
+    public String getManyCapacityInformationByIDs(@Valid @RequestHeader("serviceId") List<ServiceIdentifier> ids,
+                                                  @RequestHeader(logHeaderIdName) Long logHeaderId) {
 
         logger.debug("Getting Batch Capacity Information");
+
+        if (logHeaderId == null) {
+            logger.debug("Cannot log the wait time to DB because the Header Log ID was not supplied in the http header");
+        }
 
         String allCapacityInformation = capacityInformationRepository.getAllCapacityInformation(ids);
 
@@ -97,6 +124,8 @@ public class CapacityController {
         String nowFormatted = dateTimeFormatter.format(now);
         ArrayList<CapacityInformation> arrCiWithinTime = new ArrayList<CapacityInformation>();
         String acceptableCapacityInformation = "";
+        /// <<<<<<< HEAD
+        /// No idea what one we need yet
 
         try {
             CapacityInformation[] allCi = mapper.readValue(allCapacityInformation, CapacityInformation[].class);
@@ -107,18 +136,82 @@ public class CapacityController {
                     arrCiWithinTime.add(ci);
                 }
             }
-            acceptableCapacityInformation = mapper.writeValueAsString(arrCiWithinTime.toArray(new CapacityInformation[] {}));
+            acceptableCapacityInformation = mapper.writeValueAsString(arrCiWithinTime.toArray(new CapacityInformation[]{}));
+///=======
+     /*
+        ArrayList<String> arlServicesWithWaitTimes = new ArrayList<>();
+        try {
+        	CapacityInformation[] allCi = mapper.readValue(allCapacityInformation, CapacityInformation[].class);
+            if (logHeaderId != null) {
+                logger.debug("Logging services with wait times to DB");
+            }
+        	for (CapacityInformation ci : allCi) {
+                LocalDateTime lastUpdated = LocalDateTime.parse(ci.getLastUpdated(), dateTimeFormatter);
+                LocalDateTime lastUpdated_plusTimeToLive = lastUpdated.plusSeconds(durationWaitTimeValidSeconds);
+                if (nowFormatted.compareTo(dateTimeFormatter.format(lastUpdated_plusTimeToLive)) <= -1) {
+                	arrCiWithinTime.add(ci);
+                }                     
+
+                // Log Waiting time
+                if (logHeaderId != null) {
+	                HeaderLog headerLog = new HeaderLog();
+	                headerLog.setId(logHeaderId);
+	                DetailLog detailLog = new DetailLog();
+	                detailLog.setHeaderLog(headerLog);
+	                detailLog.setServiceId(ci.getServiceId());
+	                detailLog.setTimestamp(new Date());
+	                detailLog.setWaitTimeInMinutes(ci.getWaitingTimeMins());
+	                detailLog.setAgeInMinutes((int)java.time.temporal.ChronoUnit.MINUTES.between(lastUpdated, now));
+	                logService.saveDetails(detailLog);
+	                logger.debug("Logged service with wait time to DB. The detail ID is " + detailLog.getId());
+                }
+                arlServicesWithWaitTimes.add(ci.getServiceId());
+                
+        	}
+        	acceptableCapacityInformation = mapper.writeValueAsString(arrCiWithinTime.toArray(new CapacityInformation[] {}));
         } catch (Exception je) {
             logger.error(je.getMessage());
         }
 
+ 
+        // Log Services without Waiting times
+        if (logHeaderId != null) {
+        	logger.debug("Logging services without wait times to DB");
+        	for (ServiceIdentifier sid : ids) {
+        		if (!arlServicesWithWaitTimes.contains(sid.getId())) {
+	                HeaderLog headerLog = new HeaderLog();
+	                headerLog.setId(logHeaderId);
+	                DetailLog detailLog = new DetailLog();
+	                detailLog.setHeaderLog(headerLog);
+	                detailLog.setServiceId(sid.getId());
+	                detailLog.setTimestamp(new Date());
+	                detailLog.setWaitTimeInMinutes(null);
+	                detailLog.setAgeInMinutes(null);
+	                logService.saveDetails(detailLog);
+	                logger.debug("Logged service without wait time to DB. The detail ID is " + detailLog.getId());
+         			
+        		}
+        	}
+        }
+        
+        */
+//>>>>>>> release/sprint_4_live_pilot
+            logger.debug("Got Specified Capacity Information within acceptable time {}", acceptableCapacityInformation);
 
-        logger.debug("Got Specified Capacity Information within acceptable time {}", acceptableCapacityInformation);
 
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return acceptableCapacityInformation;
     }
 
-    @PostMapping(value = "/capacity")
+        @PostMapping(value = "/capacity")
     public void postOneCapacityInformation(@Valid @RequestBody CapacityInformationImpl capacityInformation) {
 
         // Storage in Capacity Service (Redis)
@@ -147,7 +240,6 @@ public class CapacityController {
                 logger.error("Unable to parse date '"+capacityInformation.getLastUpdated()+"' into Java Date object", e.getMessage());
             }
         }).start();
-
     }
 
     private void sendDataToCapacityHistoryService(JSONObject object){
@@ -181,37 +273,38 @@ public class CapacityController {
 
     @GetMapping(value = "/capacity/all")
     public List<CapacityInformation> getAllCapacityInformation() {
-
         List<CapacityInformation> capacityInformationList;
-
         logger.debug("Getting All Capacity Information");
-
         capacityInformationList = capacityInformationRepository.getAllCapacityInformation();
-
         logger.debug("Got All Capacity Information {}", capacityInformationList);
-
         return capacityInformationList;
-
     }
 
     @DeleteMapping(value = "/capacity/{serviceId}")
+
     public void deleteOneCapacityInformationById(@PathVariable("serviceId") String serviceId) {
-
         logger.debug("Deleting Capacity Information for Service Id: {}", serviceId);
-
         capacityInformationRepository.deleteCapacityInformation(serviceId);
-
         logger.debug("Deleted Capacity Information for Service Id: {}", serviceId);
-
     }
 
     @DeleteMapping(value = "/capacity/all")
     public void deleteManyCapacityInformation() {
-
         capacityInformationRepository.deleteAll();
-
         logger.debug("Deleted All Capacity Information");
     }
 
 
+    private HeaderLog saveLogHeader(String action, String endpoint, String username) {
+    	HeaderLog headerLog = new HeaderLog();
+    	headerLog.setAction(action);
+    	headerLog.setComponent("capacity-service");
+    	headerLog.setEndpoint(endpoint);
+    	headerLog.setHashcode(null);
+    	headerLog.setTimestamp(new Date());
+    	headerLog.setUserId(username);
+    	logService.saveHeader(headerLog);
+    	return headerLog;
+    }
+    
 }
