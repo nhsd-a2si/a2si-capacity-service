@@ -181,10 +181,10 @@ public class CapacityController {
                 Service service = new Service();
                 service.setId(capacityInformation.getServiceId());
                 service.setName(capacityInformation.getServiceName());
+                service.setRegion("Leicester, Leicestershire and Rutland");
                 waitTime.setService(service);
                 Provider provider = new Provider();
                 provider.setName("Derbyshire Health Care");
-                provider.setRegion("Leicester, Leicestershire and Rutland");
                 waitTime.setProvider(provider);
                 waitTime.setUpdated(lastUpdatedDate(capacityInformation));
                 waitTime.setWaitTimeInMinutes(capacityInformation.getWaitingTimeMins());
