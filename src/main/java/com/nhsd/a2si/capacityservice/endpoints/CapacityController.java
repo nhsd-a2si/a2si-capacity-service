@@ -97,12 +97,9 @@ public class CapacityController {
 
     @GetMapping(value = "/capacities")
     public String getManyCapacityInformationByIDs(@Valid @RequestHeader("serviceId") List<ServiceIdentifier> ids,
-                                                  @RequestHeader(logHeaderIdName) Long logHeaderId) {
+                                                  @RequestHeader(name="logHeaderIdName", required = false) Long logHeaderId) {
 
         logger.debug("Getting Batch Capacity Information");
-        if (logHeaderId == null) {
-            logger.debug("Cannot log the wait time to DB because the Header Log ID was not supplied in the http header");
-        }
 
         String allCapacityInformation = capacityInformationRepository.getAllCapacityInformation(ids);
         LocalDateTime now = LocalDateTime.now();
@@ -113,9 +110,6 @@ public class CapacityController {
         ArrayList<String> arlServicesWithWaitTimes = new ArrayList<>();
         try {
             CapacityInformation[] allCi = mapper.readValue(allCapacityInformation, CapacityInformation[].class);
-            if (logHeaderId != null) {
-                logger.debug("Logging services with wait times to DB");
-            }
             for (CapacityInformation ci : allCi) {
                 LocalDateTime lastUpdated = LocalDateTime.parse(ci.getLastUpdated(), dateTimeFormatter);
                 LocalDateTime lastUpdated_plusTimeToLive = lastUpdated.plusSeconds(durationWaitTimeValidSeconds);
@@ -125,6 +119,7 @@ public class CapacityController {
 
                 // Log Waiting time
                 if (logHeaderId != null) {
+                    logger.debug("Sending the logs for services with wait times to the Reporting Service.");
                     new Thread(() -> {
                         Detail detail = new Detail();
                         detail.setServiceId(ci.getServiceId());
@@ -145,7 +140,7 @@ public class CapacityController {
 
         // Log Services without Waiting times
         if (logHeaderId != null) {
-            logger.debug("Logging services without wait times to DB");
+            logger.debug("Sending the logs for services without with wait times to the Reporting Service.");
             for (ServiceIdentifier sid : ids) {
                 if (!arlServicesWithWaitTimes.contains(sid.getId())) {
                     new Thread(() -> {
