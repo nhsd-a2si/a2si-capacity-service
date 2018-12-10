@@ -13,6 +13,9 @@ public class Singleton {
 	@Value("${capacity.service.cache.timeToLiveInSeconds}")
 	public String timeToLiveSeconds;
 
+    @Value("${capacity.service.duration.wait.time.valid.seconds}")
+    public Integer durationWaitTimeValidSeconds;
+
     private static AtomicReference<Singleton> INSTANCE = new AtomicReference<Singleton>();
 
     public Singleton() {
