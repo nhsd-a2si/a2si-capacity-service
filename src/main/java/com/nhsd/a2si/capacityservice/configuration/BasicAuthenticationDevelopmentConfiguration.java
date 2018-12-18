@@ -15,7 +15,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
-@Profile({"capacity-service-local-redis", "test-capacity-service-local-redis"})
+@Profile({"capacity-service-local-redis", "test-capacity-service-local-redis", "capacity-service-local-stub"})
 public class BasicAuthenticationDevelopmentConfiguration extends WebSecurityConfigurerAdapter {
 
 

@@ -15,7 +15,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,16 +78,34 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         bindingResult.getAllErrors();
         List<String> errors = new ArrayList<String>();
 
+        Map<String, String> errorMap = new HashMap<String, String>();
+        
+        
+        
+        
         for (ObjectError violation : bindingResult.getAllErrors()) {
+        	
+        	String key = violation.getObjectName();
+        	
             errors.add(violation.getDefaultMessage());
         }
+        
+        List<ExceptionResponse> exceptionResponses = new ArrayList<ExceptionResponse>();
+        
+        for(String error : errors)
+        {
 
         ExceptionResponse exceptionResponse = new ExceptionResponse(
                 new SimpleDateFormat(STRING_DATE_FORMAT).format(new Date().getTime()),
                 "Validation Failed",
-                errors.toString());
+                error.toString());
+        
+        
+        exceptionResponses.add(exceptionResponse);
+        
+        }
 
-        return new ResponseEntity<>(exceptionResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(exceptionResponses, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
     // Handles malformed message bodies

@@ -1,6 +1,6 @@
 capacity:
   service:
-  	duration.wait.time.valid.seconds: 60
+    duration.wait.time.valid.seconds: 60
     cache:
       timeToLiveInSeconds: 60
 

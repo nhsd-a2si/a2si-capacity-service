@@ -8,6 +8,7 @@ import com.nhsd.a2si.capacity.reporting.service.dto.waittime.Service;
 import com.nhsd.a2si.capacity.reporting.service.dto.waittime.WaitTime;
 import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
 import com.nhsd.a2si.capacityinformation.domain.ServiceIdentifier;
+import com.nhsd.a2si.capacityservice.BulkCapacityInformationImpl;
 import com.nhsd.a2si.capacityservice.CapacityInformationImpl;
 import com.nhsd.a2si.capacityservice.persistence.CapacityInformationRepository;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ public class CapacityController {
 
     private RestTemplate restTemplate;
 
-    private static final String logHeaderIdName = "log-header-id";
+//    private static final String logHeaderIdName = "log-header-id";
 
 
     @Value("${reporting.service.api.base.url}")
@@ -96,12 +97,17 @@ public class CapacityController {
     }
 
     @GetMapping(value = "/capacities")
-    public String getManyCapacityInformationByIDs(@Valid @RequestHeader("serviceId") List<ServiceIdentifier> ids,
-                                                  @RequestHeader(name="logHeaderIdName", required = false) Long logHeaderId) {
+    public String getManyCapacityInformationByIDs(@RequestHeader(name="serviceId", required=false) List<ServiceIdentifier> serviceIdentifiers,
+                                                  @RequestHeader(name="logHeaderIdName", required=false) Long logHeaderId) {
 
         logger.debug("Getting Batch Capacity Information");
+        
+        if(serviceIdentifiers == null)
+        {
+        	serviceIdentifiers = new ArrayList<ServiceIdentifier>();
+        }
 
-        String allCapacityInformation = capacityInformationRepository.getAllCapacityInformation(ids);
+        String allCapacityInformation = capacityInformationRepository.getAllCapacityInformation(serviceIdentifiers);
         LocalDateTime now = LocalDateTime.now();
         String nowFormatted = dateTimeFormatter.format(now);
         ArrayList<CapacityInformation> arrCiWithinTime = new ArrayList<CapacityInformation>();
@@ -141,7 +147,7 @@ public class CapacityController {
         // Log Services without Waiting times
         if (logHeaderId != null) {
             logger.debug("Sending the logs for services without with wait times to the Reporting Service.");
-            for (ServiceIdentifier sid : ids) {
+            for (ServiceIdentifier sid : serviceIdentifiers) {
                 if (!arlServicesWithWaitTimes.contains(sid.getId())) {
                     new Thread(() -> {
                         Detail detail = new Detail();
@@ -192,8 +198,8 @@ public class CapacityController {
     }
 
     @PostMapping(value = "/capacities")
-    public void postManyCapacityInformation(@Valid @RequestBody List<CapacityInformationImpl> items) {
-        for (CapacityInformationImpl cap : items) {
+    public void postManyCapacityInformation(@Valid @RequestBody BulkCapacityInformationImpl items) {
+        for (CapacityInformationImpl cap : items.getBulkCapacityInformation()) {
             this.postOneCapacityInformation(cap);
         }
     }
