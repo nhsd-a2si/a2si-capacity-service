@@ -105,7 +105,7 @@ public class CapacityInformationRepositoryStubImpl implements CapacityInformatio
 
     @Override
     public String getAllCapacityInformation(List<ServiceIdentifier> in) {
-        throw new RuntimeException("to do");
+    	return new String();
     }
 
     @Override

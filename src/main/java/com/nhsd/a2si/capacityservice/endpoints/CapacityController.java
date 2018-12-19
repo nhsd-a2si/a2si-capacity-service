@@ -3,6 +3,7 @@ package com.nhsd.a2si.capacityservice.endpoints;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhsd.a2si.capacity.reporting.service.client.CapacityReportingServiceClient;
 import com.nhsd.a2si.capacity.reporting.service.dto.log.Detail;
+import com.nhsd.a2si.capacity.reporting.service.dto.log.Header;
 import com.nhsd.a2si.capacity.reporting.service.dto.waittime.Provider;
 import com.nhsd.a2si.capacity.reporting.service.dto.waittime.Service;
 import com.nhsd.a2si.capacity.reporting.service.dto.waittime.WaitTime;
@@ -119,6 +120,27 @@ public class CapacityController {
                 }
                 
                 logger.debug("Log header id: " + logHeaderId);
+                        
+                if(logHeaderId == null)
+                {
+                	// This is a direct call to the API. In this case we need to create a header to record that the
+                	// capacity service has been called.
+                    final Header header = new Header();
+                    
+                    header.setAction("GET");
+                    header.setComponent("capacity-service");
+                    header.setUserId("Capacity API");
+                    header.setEndpoint("\"/capacities\"");
+                    header.setHashcode(null);
+                    header.setTimestamp(new Date());
+                    
+                    Header saved = reporting.sendLogHeaderToRepotingService(header);
+                    
+                    logHeaderId = saved.getId();
+                	
+                }
+                
+                final Long headerId = logHeaderId; 
 
                 // Log Waiting time
                 if (logHeaderId != null) {
@@ -129,10 +151,12 @@ public class CapacityController {
                         detail.setTimestamp(new Date());
                         detail.setWaitTimeInMinutes(ci.getWaitingTimeMins());
                         detail.setAgeInMinutes((int) java.time.temporal.ChronoUnit.MINUTES.between(lastUpdated, now));
-                        this.reporting.sendLogDetailsToRepotingService(detail, logHeaderId);
+                        this.reporting.sendLogDetailsToRepotingService(detail, headerId);
                     }).start();
 
                 }
+                
+                
                 arlServicesWithWaitTimes.add(ci.getServiceId());
 
             }
@@ -140,9 +164,11 @@ public class CapacityController {
         } catch (Exception je) {
             logger.error(je.getMessage());
         }
+        
+        final Long headerId = logHeaderId;
 
         // Log Services without Waiting times
-        if (logHeaderId != null) {
+        if (headerId != null) {
             logger.debug("Sending the logs for services without with wait times to the Reporting Service.");
             for (ServiceIdentifier sid : serviceIdentifiers) {
                 if (!arlServicesWithWaitTimes.contains(sid.getId())) {
@@ -152,7 +178,7 @@ public class CapacityController {
                         detail.setTimestamp(new Date());
                         detail.setWaitTimeInMinutes(null);
                         detail.setAgeInMinutes(null);
-                        this.reporting.sendLogDetailsToRepotingService(detail, logHeaderId);
+                        this.reporting.sendLogDetailsToRepotingService(detail, headerId);
                     }).start();
                 }
             }
