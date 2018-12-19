@@ -1,6 +1,7 @@
 package com.nhsd.a2si.capacityservice.exceptions.handlers;
 
 import com.nhsd.a2si.capacityservice.exceptions.AuthenticationException;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -48,13 +50,13 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         // Return Error Response and appropriate HTTP Status Code
         return new ResponseEntity<>(exceptionResponse, HttpStatus.FORBIDDEN);
 
-    }
+    } 
 
     // UnsupportedOperationException is thrown if the resource and http method are not supported.
     // For example, a request to delete all capacity information objects is only supported when
     // using the Stub Repository, not when using the Redis implementation.
     //
-    @ExceptionHandler(value = { UnsupportedOperationException.class })
+    @ExceptionHandler(value = { UnsupportedOperationException.class})
     protected ResponseEntity<Object> handleUnsupportedOperationException(Exception exception, WebRequest request) {
         logger.debug("Handling Exception: {}", exception );
 
@@ -67,7 +69,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_IMPLEMENTED);
 
     }
-
+    
     // Exposes the Validation API messages
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
@@ -79,9 +81,6 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         List<String> errors = new ArrayList<String>();
 
         Map<String, String> errorMap = new HashMap<String, String>();
-        
-        
-        
         
         for (ObjectError violation : bindingResult.getAllErrors()) {
         	
@@ -98,8 +97,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         ExceptionResponse exceptionResponse = new ExceptionResponse(
                 new SimpleDateFormat(STRING_DATE_FORMAT).format(new Date().getTime()),
                 "Validation Failed",
-                error.toString());
-        
+                error.toString());  
         
         exceptionResponses.add(exceptionResponse);
         
@@ -107,6 +105,36 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
         return new ResponseEntity<>(exceptionResponses, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
+    
+	/**
+	 * Custom response for ServletRequestBindingException. These can be thrown for missing
+	 * Request Header Parameters.
+	 * 
+	 * @param ex the exception
+	 * @param headers the headers to be written to the response
+	 * @param status the selected response status
+	 * @param request the current request
+	 * @return a {@code ResponseEntity} instance
+	 */
+    @Override
+	protected ResponseEntity<Object> handleServletRequestBindingException(
+			ServletRequestBindingException ex,
+			HttpHeaders headers,
+			HttpStatus status,
+			WebRequest request) {
+
+    	logger.debug("Handling Exception: {}", ex);
+    	
+        final ExceptionResponse exceptionResponse = new ExceptionResponse(
+                new SimpleDateFormat(STRING_DATE_FORMAT).format(new Date().getTime()),
+                "Bad Request",
+                ex.getMessage());
+        
+        final List<ExceptionResponse> exceptionResponses = new ArrayList<ExceptionResponse>();
+        exceptionResponses.add(exceptionResponse);
+        
+        return new ResponseEntity<>(exceptionResponses, new HttpHeaders(), status);
+	}
 
     // Handles malformed message bodies
     @Override

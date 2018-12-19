@@ -1,8 +1,8 @@
 capacity:
   service:
-    duration.wait.time.valid.seconds: 60
+    duration.wait.time.valid.seconds: 6000
     cache:
-      timeToLiveInSeconds: 60
+      timeToLiveInSeconds: 6000
 
 server:
   ssl:

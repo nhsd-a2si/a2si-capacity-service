@@ -97,15 +97,10 @@ public class CapacityController {
     }
 
     @GetMapping(value = "/capacities")
-    public String getManyCapacityInformationByIDs(@RequestHeader(name="serviceId", required=false) List<ServiceIdentifier> serviceIdentifiers,
-                                                  @RequestHeader(name="logHeaderIdName", required=false) Long logHeaderId) {
+    public String getManyCapacityInformationByIDs(@RequestHeader(name="serviceId", required=true) List<ServiceIdentifier> serviceIdentifiers,
+                                                  @RequestHeader(name="log-header-id", required=false) Long logHeaderId) {
 
         logger.debug("Getting Batch Capacity Information");
-        
-        if(serviceIdentifiers == null)
-        {
-        	serviceIdentifiers = new ArrayList<ServiceIdentifier>();
-        }
 
         String allCapacityInformation = capacityInformationRepository.getAllCapacityInformation(serviceIdentifiers);
         LocalDateTime now = LocalDateTime.now();
@@ -122,6 +117,8 @@ public class CapacityController {
                 if (nowFormatted.compareTo(dateTimeFormatter.format(lastUpdated_plusTimeToLive)) <= -1) {
                     arrCiWithinTime.add(ci);
                 }
+                
+                logger.debug("Log header id: " + logHeaderId);
 
                 // Log Waiting time
                 if (logHeaderId != null) {
