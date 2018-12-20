@@ -51,9 +51,6 @@ public class CapacityController {
 
     private RestTemplate restTemplate;
 
-//    private static final String logHeaderIdName = "log-header-id";
-
-
     @Value("${reporting.service.api.base.url}")
     private String reportingService;
 
@@ -125,19 +122,7 @@ public class CapacityController {
                 {
                 	// This is a direct call to the API. In this case we need to create a header to record that the
                 	// capacity service has been called.
-                    final Header header = new Header();
-                    
-                    header.setAction("GET");
-                    header.setComponent("capacity-service");
-                    header.setUserId("Capacity API");
-                    header.setEndpoint("\"/capacities\"");
-                    header.setHashcode(null);
-                    header.setTimestamp(new Date());
-                    
-                    Header saved = reporting.sendLogHeaderToRepotingService(header);
-                    
-                    logHeaderId = saved.getId();
-                	
+                	logHeaderId = logHeader("GET");
                 }
                 
                 final Long headerId = logHeaderId; 
@@ -145,15 +130,7 @@ public class CapacityController {
                 // Log Waiting time
                 if (logHeaderId != null) {
                     logger.debug("Sending the logs for services with wait times to the Reporting Service.");
-                    new Thread(() -> {
-                        Detail detail = new Detail();
-                        detail.setServiceId(ci.getServiceId());
-                        detail.setTimestamp(new Date());
-                        detail.setWaitTimeInMinutes(ci.getWaitingTimeMins());
-                        detail.setAgeInMinutes((int) java.time.temporal.ChronoUnit.MINUTES.between(lastUpdated, now));
-                        this.reporting.sendLogDetailsToRepotingService(detail, headerId);
-                    }).start();
-
+                    logDetail(ci, headerId, now);
                 }
                 
                 
@@ -221,12 +198,18 @@ public class CapacityController {
     }
 
     @PostMapping(value = "/capacities")
-    public void postManyCapacityInformation(@Valid @RequestBody BulkCapacityInformationImpl items) {
-        for (CapacityInformationImpl cap : items.getBulkCapacityInformation()) {
+    public void postManyCapacityInformation(@Valid @RequestBody BulkCapacityInformationImpl items) 
+    {    	
+    	// This is a direct call to the API. In this case we need to create a header to record that the
+        // capacity service has been called.    
+        logHeader("POST");
+    	
+    	for (CapacityInformationImpl cap : items.getBulkCapacityInformation()) 
+    	{
+    		logger.debug("Sending the logs for services with wait times to the Reporting Service.");
             this.postOneCapacityInformation(cap);
         }
     }
-
 
     //  |  The methods bellow are for the Testers only
     //  V  Delete this comment once the methods are annotated with a Test security role.
@@ -253,12 +236,40 @@ public class CapacityController {
         logger.debug("Deleted All Capacity Information");
     }
 
-    private LocalDateTime lastUpdatedLocalDate(CapacityInformation capacityInformation) {
-        return LocalDateTime.parse(capacityInformation.getLastUpdated(), DateTimeFormatter.ofPattern(CapacityInformation.STRING_DATE_FORMAT));
-    }
-
     private Date lastUpdatedDate(CapacityInformation capacityInformation) throws ParseException {
         return new SimpleDateFormat(CapacityInformation.STRING_DATE_FORMAT).parse(capacityInformation.getLastUpdated());
+    }
+    
+    private Long logHeader(final String httpMethod)
+    {
+    	final Header header = new Header();
+        
+        header.setAction(httpMethod);
+        header.setComponent("capacity-service");
+        header.setUserId("Capacity API");
+        header.setEndpoint("\"/capacities\"");
+        header.setHashcode(null);
+        header.setTimestamp(new Date());
+            
+        final Header saved = reporting.sendLogHeaderToRepotingService(header);
+        
+        return saved.getId();
+    }
+    
+    private void logDetail(final CapacityInformation cap,
+    		final Long logHeaderId,
+    		final LocalDateTime now)
+    {
+    	LocalDateTime lastUpdated = LocalDateTime.parse(cap.getLastUpdated(), dateTimeFormatter);
+    	
+    	new Thread(() -> {
+            Detail detail = new Detail();
+            detail.setServiceId(cap.getServiceId());
+            detail.setTimestamp(new Date());
+            detail.setWaitTimeInMinutes(cap.getWaitingTimeMins());
+            detail.setAgeInMinutes((int) java.time.temporal.ChronoUnit.MINUTES.between(lastUpdated, now));
+            this.reporting.sendLogDetailsToRepotingService(detail, logHeaderId);
+        }).start();
     }
 
 }
