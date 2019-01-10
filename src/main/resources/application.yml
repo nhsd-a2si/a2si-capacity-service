@@ -17,7 +17,7 @@ spring:
 server:
   port: 7020
   ssl:
-    key-store: /keystore.jks
+    key-store: ./keystore.jks
     key-store-password: changeit
     keyStoreType: PKCS12
     keyAlias: capacityservice

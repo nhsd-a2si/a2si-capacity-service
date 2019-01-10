@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -18,8 +19,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,36 +76,48 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     
     // Exposes the Validation API messages
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+    		HttpHeaders headers,
+    		HttpStatus status,
+    		WebRequest request) 
+    {
         logger.debug("Handling Exception: {}", ex );
-
-        BindingResult bindingResult = ex.getBindingResult();
-        bindingResult.getAllErrors();
-        List<String> errors = new ArrayList<String>();
-
-        Map<String, String> errorMap = new HashMap<String, String>();
         
-        for (ObjectError violation : bindingResult.getAllErrors()) {
-        	
-        	String key = violation.getObjectName();
-        	
-            errors.add(violation.getDefaultMessage());
+        // Add to a Set to remove duplicates
+        final Set<String> validationErrors = new HashSet<String>();
+        for (ObjectError violation : ex.getBindingResult().getAllErrors())
+        {
+        	validationErrors.add(violation.getDefaultMessage());
         }
         
-        List<ExceptionResponse> exceptionResponses = new ArrayList<ExceptionResponse>();
+        // Convert to a list so we can sort by service identifier
+        List<String> validationErrorsList = new ArrayList<String>();
+        validationErrorsList.addAll(validationErrors);
         
-        for(String error : errors)
-        {
+        // Sort the validation errors by service identifier and validation code.
+        validationErrorsList.sort(null);
 
+        final List<ExceptionResponseDetail> exceptionResponseDetails = new ArrayList<ExceptionResponseDetail>();                
+        for (String validationError : validationErrorsList)
+        {
+        	String delimiter = "^";
+        	
+        	StringTokenizer st = new StringTokenizer(validationError, delimiter);
+        	String serviceIdentifer = st.nextToken();
+        	String validationCode = st.nextToken();
+        	String detailMessage = st.nextToken();
+        	
+            final ExceptionResponseDetail erd = new ExceptionResponseDetail(validationCode,detailMessage,serviceIdentifer);	
+            exceptionResponseDetails.add(erd);
+        }
+        
+        final List<ExceptionResponse> exceptionResponses = new ArrayList<ExceptionResponse>();
         ExceptionResponse exceptionResponse = new ExceptionResponse(
                 new SimpleDateFormat(STRING_DATE_FORMAT).format(new Date().getTime()),
                 "Validation Failed",
-                error.toString());  
+                exceptionResponseDetails);  
         
-        exceptionResponses.add(exceptionResponse);
-        
-        }
+        exceptionResponses.add(exceptionResponse); 
 
         return new ResponseEntity<>(exceptionResponses, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
@@ -125,7 +141,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
     	logger.debug("Handling Exception: {}", ex);
     	
-        final ExceptionResponse exceptionResponse = new ExceptionResponse(
+    	final ExceptionResponse exceptionResponse = new ExceptionResponse(
                 new SimpleDateFormat(STRING_DATE_FORMAT).format(new Date().getTime()),
                 "Bad Request",
                 ex.getMessage());
