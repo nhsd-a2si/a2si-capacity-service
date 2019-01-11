@@ -125,7 +125,7 @@ public class CapacityController {
                 {
                 	// This is a direct call to the API. In this case we need to create a header to record that the
                 	// capacity service has been called.
-                	loggingService.logHeader("GET");
+                	logHeaderId = loggingService.logHeader("GET");
                 }
                 
                 final Long headerId = logHeaderId; 
