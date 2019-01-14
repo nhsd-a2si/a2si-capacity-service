@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +12,6 @@ import com.nhsd.a2si.capacity.reporting.service.dto.log.Detail;
 import com.nhsd.a2si.capacity.reporting.service.dto.log.Header;
 import com.nhsd.a2si.capacityinformation.domain.CapacityInformation;
 import com.nhsd.a2si.capacityservice.alerts.CapacityServiceAlert;
-import com.nhsd.a2si.capacityservice.endpoints.CapacityController;
 
 @Service
 public class LoggingService 
