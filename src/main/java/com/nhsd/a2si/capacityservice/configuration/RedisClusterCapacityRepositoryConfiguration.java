@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,6 +23,9 @@ public class RedisClusterCapacityRepositoryConfiguration {
 
     @Value("${spring.redis.cluster.nodes}")
     private List<String> redisNodeUrls;
+    
+    @Value("${redis.password}")
+    private String redisPassword;
 
     @Bean
     LettuceClientConfiguration lettuceClientConfiguration(){
@@ -40,7 +44,14 @@ public class RedisClusterCapacityRepositoryConfiguration {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(new RedisClusterConfiguration(redisNodeUrls), lettuceClientConfiguration());
+    	
+    	final RedisClusterConfiguration redisClusterConfiguration = new RedisClusterConfiguration(redisNodeUrls);
+    	
+    	final RedisPassword redisPasswordToken = RedisPassword.of(redisPassword);
+    	redisClusterConfiguration.setPassword(redisPasswordToken);
+
+    	return new LettuceConnectionFactory(redisClusterConfiguration
+        		                           ,lettuceClientConfiguration());
     }
 
     @Bean
@@ -50,5 +61,5 @@ public class RedisClusterCapacityRepositoryConfiguration {
         redisTemplate.setConnectionFactory(redisConnectionFactory());
         return redisTemplate;
     }
-
+    
 }
