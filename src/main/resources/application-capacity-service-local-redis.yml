@@ -1,14 +1,23 @@
-jedis:
-  host: 127.0.0.1
-  port: 6379
-  ssl: false
-
 capacity:
   service:
     duration.wait.time.valid.seconds: 1800
     cache:
       timeToLiveInSeconds: 3600
+      
+reporting:
+  service:
+    api:
+      base:
+        url: anything
+    username: anything
+    password: anything
 
 server:
   ssl:
-    enabled: false
+    enabled: true
+
+    
+spring:
+  redis:
+    cluster:
+      nodes: 127.0.0.1:7000
