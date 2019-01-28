@@ -5,7 +5,10 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.TableCollection;
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
+import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
@@ -22,7 +25,7 @@ import java.util.Collections;
 import java.util.Objects;
 
 @Component
-@Profile({"capacity-service-aws-redis", "capacity-service-aws-stub"})
+@Profile({"capacity-service-aws-redis", "capacity-service-aws-stub", "capacity-service-local-redis"})
 public class UserAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
@@ -50,6 +53,7 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
 
     private Item getItemByUsername(String name) {
         DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
+        TableCollection<ListTablesResult> tables = dynamoDB.listTables();
         Table table = dynamoDB.getTable(dynamoAuthenticationTableName);
         GetItemSpec spec = new GetItemSpec().withPrimaryKey("USERNAME", name);
         return table.getItem(spec);

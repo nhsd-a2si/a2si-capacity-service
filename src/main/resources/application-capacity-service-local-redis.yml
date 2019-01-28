@@ -21,3 +21,12 @@ spring:
   redis:
     cluster:
       nodes: 127.0.0.1:7000
+      
+
+amazon:
+  aws:
+    dynamo:
+      table : Authorisation
+      endpoint : http://localhost:8000
+      accesskey : key
+      secretkey : key2    

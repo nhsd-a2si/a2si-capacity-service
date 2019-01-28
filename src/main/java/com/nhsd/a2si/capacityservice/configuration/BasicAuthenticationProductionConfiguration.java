@@ -12,7 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 @EnableWebSecurity
-@Profile({"capacity-service-aws-redis", "capacity-service-aws-stub"})
+@Profile({"capacity-service-aws-redis", "capacity-service-aws-stub", "capacity-service-local-redis"})
 public class BasicAuthenticationProductionConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
