@@ -11,7 +11,7 @@ reporting:
         url: anything
     username: anything
     password: anything
-
+    
 server:
   ssl:
     enabled: true
@@ -27,6 +27,6 @@ amazon:
   aws:
     dynamo:
       table : Authorisation
-      endpoint : http://localhost:8000
+      endpoint : http://localhost:8010
       accesskey : key
       secretkey : key2    
