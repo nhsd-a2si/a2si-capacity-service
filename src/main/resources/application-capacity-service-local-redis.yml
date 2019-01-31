@@ -1,3 +1,7 @@
+dos:
+  proxy:
+    user: DOS_PROXY
+
 capacity:
   service:
     duration.wait.time.valid.seconds: 1800
@@ -27,6 +31,6 @@ amazon:
   aws:
     dynamo:
       table : Authorisation
-      endpoint : http://localhost:8010
+      endpoint : http://localhost:8000
       accesskey : key
       secretkey : key2    

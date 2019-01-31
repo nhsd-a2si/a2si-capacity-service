@@ -1,5 +1,10 @@
+dos:
+  proxy:
+    user: DOS_PROXY
+
 capacity:
   service:
+    user: CAPACITY_SERVICE
     duration.wait.time.valid.seconds: 6000
     cache:
       timeToLiveInSeconds: 6000
