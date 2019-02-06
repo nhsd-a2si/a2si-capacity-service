@@ -11,7 +11,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 
-@Profile({"capacity-service-local-redis"})
+@Profile({"capacity-service-local-redis", "capacity-service-local-stub"})
 @Configuration
 //@EnableDynamoDBRepositories
 //  (basePackages = "com.baeldung.spring.data.dynamodb.repositories")
